@@ -1,0 +1,1210 @@
+<title>Gartenstadt-Entdecker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{
+    --moss-900:#16241a; --moss-700:#2f5233; --moss-500:#4c7a52; --moss-300:#a9c6a4;
+    --leaf-050:#f7faf1; --leaf-100:#eaf1e1; --leaf-200:#dbe9cd;
+    --pond-600:#2f7679; --pond-400:#5aa9ac; --pond-100:#dcf0ef;
+    --path-300:#e7cf9c; --path-500:#c9a465;
+    --brick-500:#c1622b; --brick-600:#a34f21;
+    --sun-400:#f2b544; --sun-500:#dc9a2c;
+    --rose-500:#b5544f; --clay-500:#8c6b4f;
+    --ink-900:#1c2620; --ink-700:#3a463c;
+    --surface:#ffffff; --surface-2:#fdfbf6;
+    --border:rgba(28,38,32,.14);
+    --shadow:0 10px 30px -12px rgba(20,35,22,.28);
+    --font-display:'Baloo 2', 'Noto Sans', sans-serif;
+    --font-body:'Noto Sans', sans-serif;
+    --hero-grad-a:#3a6640; --hero-grad-b:#16241a; --hero-text:#f7faf1;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --moss-900:#eaf1e1; --moss-700:#bcd8b6; --moss-500:#9fc79b; --moss-300:#3a5238;
+      --leaf-050:#101a13; --leaf-100:#152018; --leaf-200:#1c2c1f;
+      --pond-600:#7fd0d1; --pond-400:#4b9497; --pond-100:#16302f;
+      --path-300:#5b4c2e; --path-500:#8a6f3c;
+      --brick-500:#e08857; --brick-600:#c1622b;
+      --sun-400:#f2c369; --sun-500:#e0a83a;
+      --rose-500:#d98c86; --clay-500:#b99872;
+      --ink-900:#eef3ea; --ink-700:#cbd6c6;
+      --surface:#182319; --surface-2:#1c281e;
+      --border:rgba(234,241,225,.14);
+      --shadow:0 10px 30px -12px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --moss-900:#eaf1e1; --moss-700:#bcd8b6; --moss-500:#9fc79b; --moss-300:#3a5238;
+    --leaf-050:#101a13; --leaf-100:#152018; --leaf-200:#1c2c1f;
+    --pond-600:#7fd0d1; --pond-400:#4b9497; --pond-100:#16302f;
+    --path-300:#5b4c2e; --path-500:#8a6f3c;
+    --brick-500:#e08857; --brick-600:#c1622b;
+    --sun-400:#f2c369; --sun-500:#e0a83a;
+    --rose-500:#d98c86; --clay-500:#b99872;
+    --ink-900:#eef3ea; --ink-700:#cbd6c6;
+    --surface:#182319; --surface-2:#1c281e;
+    --border:rgba(234,241,225,.14);
+    --shadow:0 10px 30px -12px rgba(0,0,0,.55);
+    color-scheme: dark;
+  }
+  html[lang="ar"]{ --font-display:'Noto Sans Arabic','Noto Sans',sans-serif; --font-body:'Noto Sans Arabic','Noto Sans',sans-serif; }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--leaf-050); color:var(--ink-900);
+    font-family:var(--font-body); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:var(--font-display); text-wrap:balance;}
+  .wrap{max-width:1180px; margin:0 auto; padding:20px 20px 64px;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; justify-content:space-between;
+    padding:22px 24px; margin-bottom:22px; border-radius:22px;
+    background:linear-gradient(155deg, var(--hero-grad-a), var(--hero-grad-b) 130%);
+    color:var(--hero-text); box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  header.top::before{
+    content:""; position:absolute; inset:0; opacity:.15; pointer-events:none;
+    background-image: radial-gradient(circle at 15% 20%, #fff 0, transparent 45%), radial-gradient(circle at 85% 80%, #fff 0, transparent 40%);
+  }
+  .title-block{position:relative; z-index:1; min-width:240px;}
+  .eyebrow{font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; opacity:.8; font-weight:600; margin:0 0 4px;}
+  header.top h1{font-size:clamp(1.5rem,3vw,2.15rem); margin:0 0 6px; font-weight:700;}
+  header.top p{margin:0; opacity:.92; max-width:46ch; font-size:.97rem;}
+  .header-side{position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; align-items:flex-end;}
+  [dir="rtl"] .header-side{align-items:flex-start;}
+
+  .lang-row{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
+  [dir="rtl"] .lang-row{justify-content:flex-start;}
+  .lang-btn{
+    font-family:var(--font-body); border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.08);
+    color:var(--hero-text); padding:6px 12px; border-radius:999px; font-size:.82rem; cursor:pointer;
+    transition:background .15s, transform .15s;
+  }
+  .lang-btn:hover{background:rgba(255,255,255,.2);}
+  .lang-btn[aria-pressed="true"]{background:var(--sun-400); color:#2a1c05; border-color:transparent; font-weight:700;}
+  .lang-btn:focus-visible{outline:2px solid var(--sun-400); outline-offset:2px;}
+
+  /* ---------- Layout ---------- */
+  .layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr); gap:20px; align-items:start;}
+  @media (max-width:880px){ .layout{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    box-shadow:var(--shadow); padding:18px;
+  }
+  .map-panel{padding:14px;}
+
+  .map-tools{display:flex; flex-wrap:wrap; gap:8px; margin:0 4px 10px;}
+  .tool-btn{
+    font-family:var(--font-body); font-size:.78rem; font-weight:600; padding:7px 14px; border-radius:999px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--ink-900); cursor:pointer;
+  }
+  .tool-btn:hover{background:var(--leaf-200);}
+  .tool-btn.active{background:var(--moss-500); color:#fff; border-color:transparent;}
+
+  .map-frame{
+    position:relative; width:100%; aspect-ratio:10/7.6; border-radius:16px; overflow:hidden;
+    background:var(--leaf-100); border:1px solid var(--border);
+  }
+  #leafletMap{width:100%; height:100%;}
+  .leaflet-container{font-family:var(--font-body); background:var(--leaf-100);}
+  .leaflet-control-attribution{background:var(--surface-2) !important; color:var(--ink-700) !important; font-size:.68rem !important;}
+  .leaflet-control-attribution a{color:var(--pond-600) !important;}
+  .leaflet-bar a{background:var(--surface) !important; color:var(--ink-900) !important; border-color:var(--border) !important;}
+  .leaflet-bar a:hover{background:var(--leaf-200) !important;}
+
+  .map-loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
+    background:var(--leaf-100); color:var(--ink-700); font-size:.85rem; z-index:500; text-align:center; padding:20px;
+  }
+  .map-loading.hide{display:none;}
+  .spinner{width:26px; height:26px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--moss-500); animation:spin .9s linear infinite;}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+
+  .pin-marker{
+    width:40px; height:40px; border-radius:50%; background:var(--surface); border:4px solid var(--pin-color, var(--moss-500));
+    display:flex; align-items:center; justify-content:center; font-size:19px; box-shadow:0 3px 10px rgba(20,30,20,.3);
+    transition:transform .15s ease; position:relative;
+  }
+  .pin-marker:hover{transform:scale(1.12);}
+  .pin-marker.kita{width:56px; height:56px; font-size:28px; border-color:var(--brick-600);}
+
+  .legend{margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;}
+  .legend-chip{
+    display:flex; align-items:center; gap:6px; font-size:.78rem; padding:5px 10px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--ink-700);
+    font-family:var(--font-body); cursor:pointer; transition:background .15s, border-color .15s, color .15s;
+  }
+  .legend-chip:hover{border-color:var(--moss-500);}
+  .legend-chip.active{background:var(--moss-500); border-color:transparent; color:#fff;}
+  .legend-chip:focus-visible{outline:2px solid var(--moss-500); outline-offset:2px;}
+  .legend-dot{width:9px; height:9px; border-radius:50%; flex:none;}
+  .legend-chip.active .legend-dot{outline:2px solid rgba(255,255,255,.6);}
+  .empty-hint{font-size:.85rem; color:var(--ink-700); opacity:.8; padding:10px 4px;}
+
+  .plz-block{margin-top:14px; padding-top:12px; border-top:1px dashed var(--border);}
+  .plz-label{font-size:.78rem; font-weight:700; color:var(--ink-700); margin:0 0 8px;}
+  .plz-filter{display:flex; flex-wrap:wrap; gap:8px;}
+  .plz-chip{
+    display:flex; align-items:center; gap:7px; font-size:.78rem; font-weight:600; padding:6px 12px 6px 8px; border-radius:999px;
+    background:var(--surface-2); border:1.5px solid var(--border); color:var(--ink-900);
+    font-family:var(--font-body); cursor:pointer; transition:background .15s, border-color .15s, color .15s;
+  }
+  .plz-chip:hover{border-color:var(--plz-color, var(--moss-500));}
+  .plz-chip:focus-visible{outline:2px solid var(--moss-500); outline-offset:2px;}
+  .plz-chip.active{background:var(--plz-color, var(--moss-500)); border-color:transparent; color:#fff;}
+  .plz-swatch{width:12px; height:12px; border-radius:4px; background:var(--plz-color, var(--moss-500)); flex:none;}
+  .plz-chip.active .plz-swatch{outline:2px solid rgba(255,255,255,.65);}
+
+  /* ---------- Sidebar ---------- */
+  .side h2{font-size:1.05rem; margin:0 0 8px;}
+  .intro-text{font-size:.92rem; color:var(--ink-700); margin:0 0 16px;}
+  .checklist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+  .checklist li{
+    display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:12px; cursor:pointer;
+    border:1px solid transparent; background:var(--surface-2); transition:background .15s, border-color .15s;
+  }
+  .checklist li:hover{border-color:var(--border);}
+  .checklist .dot{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; flex:none; background:var(--leaf-200); color:var(--ink-700);}
+  .checklist .name{font-size:.86rem; font-weight:600; flex:1; min-width:0;}
+  .checklist .cat{display:block; font-size:.72rem; font-weight:400; color:var(--ink-700); opacity:.8;}
+
+  @media (prefers-reduced-motion: reduce){ .pin-marker:hover{transform:none;} .spinner{animation-duration:2.4s;} }
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(15,22,16,.55); backdrop-filter:blur(2px);
+    display:flex; align-items:flex-end; justify-content:center; padding:0; z-index:5000;
+    opacity:0; pointer-events:none; transition:opacity .18s ease;
+  }
+  @media (min-width:640px){ .overlay{align-items:center; padding:24px;} }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .modal{
+    background:var(--surface); width:100%; max-width:480px; border-radius:22px 22px 0 0;
+    padding:22px 22px 26px; box-shadow:0 -10px 40px rgba(0,0,0,.3); max-height:85vh; overflow-y:auto;
+    transform:translateY(16px); transition:transform .2s ease;
+  }
+  @media (min-width:640px){ .modal{border-radius:22px; transform:translateY(0) scale(.97);} }
+  .overlay.open .modal{transform:translateY(0) scale(1);}
+  .modal-head{display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;}
+  .modal-icon{
+    width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+    font-size:26px; background:var(--leaf-100); flex:none; border:2px solid var(--border);
+  }
+  .modal-head h3{margin:0 0 3px; font-size:1.15rem;}
+  .modal-cat{font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--pond-600);}
+  .modal-close{
+    margin-inline-start:auto; background:var(--surface-2); border:1px solid var(--border); width:34px; height:34px;
+    border-radius:50%; font-size:1rem; cursor:pointer; color:var(--ink-900); flex:none;
+  }
+  .modal-close:hover{background:var(--leaf-200);}
+  .modal-desc{font-size:.94rem; color:var(--ink-900); margin:12px 0;}
+  .modal-meta{display:flex; flex-direction:column; gap:8px; margin-top:14px; font-size:.86rem;}
+  .modal-meta .row{display:flex; gap:8px;}
+  .modal-meta .k{font-weight:700; min-width:110px; color:var(--ink-700); flex:none;}
+  .modal-tag{
+    display:inline-flex; align-items:center; gap:6px; margin-top:14px; font-size:.78rem; font-weight:700;
+    padding:6px 12px; border-radius:999px; background:var(--leaf-200); color:var(--moss-700);
+  }
+  footer{margin-top:26px; text-align:center; font-size:.78rem; color:var(--ink-700); opacity:.85;}
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="title-block">
+      <p class="eyebrow" data-i18n="eyebrow">Kita Zur Gartenstadt · Berlin-Bohnsdorf</p>
+      <h1 data-i18n="siteTitle">Gartenstadt-Entdecker</h1>
+      <p data-i18n="intro">Diese Karte zeigt, wer Familien rund um unsere Kita unterstützt – zum Anschauen, Anklicken und Entdecken.</p>
+    </div>
+    <div class="header-side">
+      <div class="lang-row" id="langRow" role="group" aria-label="Sprache wählen"></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="panel map-panel">
+      <div class="map-tools">
+        <button class="tool-btn active" id="btnNeighborhood" type="button" data-i18n="viewNeighborhood">Nachbarschaft</button>
+        <button class="tool-btn" id="btnAll" type="button" data-i18n="viewAll">Alle Orte</button>
+      </div>
+      <div class="map-frame">
+        <div id="leafletMap" role="img" aria-label="Karte des Sozialraums"></div>
+        <div class="map-loading" id="mapLoading">
+          <div class="spinner" aria-hidden="true"></div>
+          <span data-i18n="mapLoading">Karte wird geladen …</span>
+        </div>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="plz-block">
+        <p class="plz-label" data-i18n="plzFilterLabel">Nach Postleitzahl anzeigen:</p>
+        <div class="plz-filter" id="plzFilter"></div>
+      </div>
+    </div>
+
+    <aside class="panel side">
+      <h2 data-i18n="legendTitle">Was gibt es zu entdecken?</h2>
+      <p class="intro-text" data-i18n="sideHint">Tippt auf einen Ort in der Karte oder in der Liste, um mehr zu erfahren.</p>
+      <ul class="checklist" id="checklist"></ul>
+    </aside>
+  </div>
+
+  <footer data-i18n="footer">Erstellt für die LEK „Unterstützungssysteme im Sozialraum“ · Angaben recherchiert aus öffentlichen Quellen, Stand September 2026.</footer>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-icon" id="modalIcon">🐸</div>
+      <div style="flex:1; min-width:0;">
+        <p class="modal-cat" id="modalCat"></p>
+        <h3 id="modalTitle"></h3>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+    </div>
+    <p class="modal-desc" id="modalDesc"></p>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div id="modalTagWrap"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var UI = {
+    de:{ eyebrow:"Kita Zur Gartenstadt · Berlin-Bohnsdorf", siteTitle:"Gartenstadt-Entdecker",
+      intro:"Diese Karte zeigt, wer Familien rund um unsere Kita unterstützt – zum Anschauen, Anklicken und Entdecken.",
+      legendTitle:"Was gibt es zu entdecken?", sideHint:"Tippt auf einen Ort in der Karte oder in der Liste, um mehr zu erfahren.",
+      footer:"Erstellt für die LEK „Unterstützungssysteme im Sozialraum“ · Angaben recherchiert aus öffentlichen Quellen, Stand September 2026.",
+      addressLabel:"Adresse", phoneLabel:"Telefon", hoursLabel:"Öffnungszeiten",
+      close:"Schließen",
+      startHere:"Hier startet ihr", langName:"Deutsch",
+      mapLoading:"Karte wird geladen …", viewNeighborhood:"Nachbarschaft", viewAll:"Alle Orte",
+      filterAll:"Alle anzeigen", emptyFilter:"Keine Orte in dieser Kategorie.",
+      plzFilterLabel:"Nach Postleitzahl anzeigen:", plzReset:"Ganzer Kiez", plzEmptyFilter:"Keine Orte mit dieser Postleitzahl (und Kategorie)."
+    },
+    en:{ eyebrow:"Zur Gartenstadt Preschool · Berlin-Bohnsdorf", siteTitle:"Neighborhood Explorer",
+      intro:"This map shows who supports families around our preschool – look around, click, and discover.",
+      legendTitle:"What is there to discover?", sideHint:"Tap a spot on the map or in the list to learn more.",
+      footer:"Created for the assignment “Support systems in the social space” · Information researched from public sources, as of September 2026.",
+      addressLabel:"Address", phoneLabel:"Phone", hoursLabel:"Opening hours",
+      close:"Close",
+      startHere:"You start here", langName:"English",
+      mapLoading:"Loading map …", viewNeighborhood:"Neighborhood", viewAll:"All places",
+      filterAll:"Show all", emptyFilter:"No places in this category.",
+      plzFilterLabel:"Show by postal code:", plzReset:"Whole neighborhood", plzEmptyFilter:"No places with this postal code (and category)."
+    },
+    tr:{ eyebrow:"Zur Gartenstadt Kreşi · Berlin-Bohnsdorf", siteTitle:"Mahalle Kâşifi",
+      intro:"Bu harita, kreşimizin çevresinde ailelere destek olan yerleri gösterir – gezin, tıklayın ve keşfedin.",
+      legendTitle:"Neler keşfedilecek?", sideHint:"Daha fazla bilgi için haritadaki veya listedeki bir yere dokunun.",
+      footer:"“Sosyal alanda destek sistemleri” ödevi için hazırlanmıştır · Bilgiler kamuya açık kaynaklardan araştırılmıştır, Eylül 2026 itibarıyla.",
+      addressLabel:"Adres", phoneLabel:"Telefon", hoursLabel:"Açılış saatleri",
+      close:"Kapat",
+      startHere:"Buradan başlıyorsunuz", langName:"Türkçe",
+      mapLoading:"Harita yükleniyor …", viewNeighborhood:"Mahalle", viewAll:"Tüm yerler",
+      filterAll:"Tümünü göster", emptyFilter:"Bu kategoride yer yok.",
+      plzFilterLabel:"Posta koduna göre göster:", plzReset:"Tüm mahalle", plzEmptyFilter:"Bu posta kodunda (ve kategoride) yer yok."
+    },
+    ru:{ eyebrow:"Детский сад Zur Gartenstadt · Берлин-Бонсдорф", siteTitle:"Путеводитель по району",
+      intro:"Эта карта показывает, кто поддерживает семьи рядом с нашим садом – смотрите, нажимайте и открывайте новое.",
+      legendTitle:"Что можно найти?", sideHint:"Нажмите на точку на карте или в списке, чтобы узнать больше.",
+      footer:"Подготовлено для задания «Системы поддержки в социальном пространстве» · Сведения взяты из открытых источников, по состоянию на сентябрь 2026 года.",
+      addressLabel:"Адрес", phoneLabel:"Телефон", hoursLabel:"Часы работы",
+      close:"Закрыть",
+      startHere:"Здесь вы начинаете", langName:"Русский",
+      mapLoading:"Загрузка карты …", viewNeighborhood:"Район", viewAll:"Все места",
+      filterAll:"Показать все", emptyFilter:"В этой категории нет мест.",
+      plzFilterLabel:"Показать по почтовому индексу:", plzReset:"Весь квартал", plzEmptyFilter:"Нет мест с этим индексом (и категорией)."
+    },
+    ar:{ eyebrow:"روضة Zur Gartenstadt · برلين-بونسدورف", siteTitle:"مستكشف الحي",
+      intro:"توضح هذه الخريطة الجهات التي تدعم العائلات حول روضتنا – تجوّلوا، انقروا، واكتشفوا.",
+      legendTitle:"ماذا يمكن اكتشافه؟", sideHint:"اضغطوا على مكان في الخريطة أو في القائمة لمعرفة المزيد.",
+      footer:"أُعِدّت هذه الخريطة لواجب «أنظمة الدعم في الحيّ الاجتماعي» · المعلومات مبنية على مصادر عامة، بتاريخ سبتمبر 2026.",
+      addressLabel:"العنوان", phoneLabel:"الهاتف", hoursLabel:"ساعات العمل",
+      close:"إغلاق",
+      startHere:"من هنا تبدأون", langName:"العربية",
+      mapLoading:"جارٍ تحميل الخريطة …", viewNeighborhood:"الحي", viewAll:"كل الأماكن",
+      filterAll:"عرض الكل", emptyFilter:"لا توجد أماكن في هذه الفئة.",
+      plzFilterLabel:"عرض حسب الرمز البريدي:", plzReset:"الحي بأكمله", plzEmptyFilter:"لا توجد أماكن بهذا الرمز البريدي (والفئة)."
+    }
+  };
+
+  var CATS = {
+    kita:{icon:"🐸", color:"var(--brick-500)", label:{de:"Kita",en:"Preschool",tr:"Kreş",ru:"Детский сад",ar:"روضة أطفال"}},
+    beratung:{icon:"💬", color:"var(--pond-600)", label:{de:"Beratung & Familie",en:"Counseling & Family",tr:"Danışmanlık ve Aile",ru:"Консультации и семья",ar:"استشارة وأسرة"}},
+    jugend:{icon:"🎨", color:"var(--sun-500)", label:{de:"Jugendtreff",en:"Youth Club",tr:"Gençlik Kulübü",ru:"Молодёжный клуб",ar:"نادي شباب"}},
+    schule:{icon:"🎒", color:"var(--moss-700)", label:{de:"Schule & Hort",en:"School & After-School Care",tr:"Okul ve Bakım",ru:"Школа и продлёнка",ar:"مدرسة ورعاية نهارية"}},
+    bibliothek:{icon:"📚", color:"var(--pond-400)", label:{de:"Bibliothek",en:"Library",tr:"Kütüphane",ru:"Библиотека",ar:"مكتبة"}},
+    gesundheit:{icon:"🩺", color:"var(--rose-500)", label:{de:"Gesundheit",en:"Health",tr:"Sağlık",ru:"Здоровье",ar:"صحة"}},
+    spiel:{icon:"🛝", color:"var(--sun-400)", label:{de:"Spielplatz",en:"Playground",tr:"Oyun Alanı",ru:"Детская площадка",ar:"ملعب أطفال"}},
+    sport:{icon:"🤸", color:"var(--moss-500)", label:{de:"Sport & Bewegung",en:"Sports & Movement",tr:"Spor ve Hareket",ru:"Спорт и движение",ar:"رياضة وحركة"}},
+    gemeinde:{icon:"⛪", color:"var(--clay-500)", label:{de:"Gemeinde & Treffpunkt",en:"Parish & Meeting Place",tr:"Cemaat ve Buluşma Noktası",ru:"Приход и место встреч",ar:"أبرشية ومكان لقاء"}},
+    amt:{icon:"🏛️", color:"var(--clay-500)", label:{de:"Amt & Beratung",en:"Public Office & Counseling",tr:"Daire ve Danışmanlık",ru:"Учреждение и консультации",ar:"مكتب حكومي واستشارة"}},
+    migration:{icon:"🌍", color:"var(--pond-600)", label:{de:"Willkommen & Sprachen",en:"Welcome & Languages",tr:"Karşılama ve Diller",ru:"Приём и языки",ar:"استقبال ولغات"}}
+  };
+
+  var PLZ_AREAS = {"12524":{"name":"Altglienicke","color":"var(--sun-500)","ring":[[52.39504,13.53566],[52.39527,13.53573],[52.39554,13.5358],[52.39564,13.53587],[52.39578,13.53593],[52.39595,13.536],[52.39635,13.53627],[52.39639,13.53627],[52.39662,13.5364],[52.39679,13.53647],[52.39689,13.53654],[52.39703,13.53661],[52.3972,13.53667],[52.39774,13.53634],[52.39784,13.53634],[52.39797,13.53694],[52.39804,13.53721],[52.39824,13.53708],[52.39858,13.53721],[52.39885,13.53741],[52.39919,13.53768],[52.39986,13.53815],[52.39996,13.53822],[52.40064,13.53842],[52.40047,13.53809],[52.40033,13.53782],[52.4001,13.53728],[52.4,13.53708],[52.4,13.53701],[52.39993,13.53688],[52.39979,13.53647],[52.39942,13.5356],[52.39925,13.53506],[52.39892,13.53385],[52.39888,13.53371],[52.39858,13.53291],[52.39854,13.53284],[52.39844,13.53257],[52.39807,13.53163],[52.3979,13.53122],[52.39763,13.53055],[52.39743,13.53008],[52.3973,13.52968],[52.39743,13.52941],[52.39753,13.52921],[52.3976,13.52914],[52.39763,13.529],[52.39797,13.52833],[52.39807,13.5282],[52.39824,13.52779],[52.39831,13.52766],[52.39854,13.52719],[52.39885,13.52658],[52.39895,13.52638],[52.39902,13.52604],[52.39908,13.52584],[52.39919,13.52537],[52.39939,13.52463],[52.39962,13.52396],[52.39993,13.52315],[52.39996,13.52302],[52.40006,13.52281],[52.40023,13.52248],[52.40037,13.52221],[52.40057,13.5218],[52.40067,13.52127],[52.4007,13.52106],[52.40074,13.52086],[52.40077,13.52059],[52.40104,13.51898],[52.40111,13.51864],[52.40155,13.51716],[52.40161,13.51689],[52.40168,13.51649],[52.40172,13.51635],[52.40178,13.51602],[52.40185,13.51602],[52.40219,13.51602],[52.40283,13.51696],[52.40333,13.51662],[52.40357,13.51703],[52.40387,13.51756],[52.40438,13.51837],[52.40468,13.51878],[52.40495,13.51931],[52.40512,13.51905],[52.40623,13.52059],[52.4063,13.52073],[52.4064,13.52059],[52.40671,13.521],[52.40698,13.52133],[52.40728,13.52167],[52.40745,13.5218],[52.40833,13.52227],[52.40853,13.52234],[52.40927,13.52261],[52.40961,13.52275],[52.41032,13.52302],[52.41082,13.52322],[52.41102,13.52295],[52.41166,13.52349],[52.41183,13.52328],[52.41214,13.52302],[52.41241,13.52342],[52.41264,13.52322],[52.41318,13.52362],[52.41359,13.52409],[52.41369,13.52382],[52.41416,13.52261],[52.41433,13.52261],[52.41443,13.52227],[52.41544,13.52295],[52.41571,13.52281],[52.41625,13.52248],[52.41693,13.52221],[52.41723,13.52214],[52.41736,13.52214],[52.41787,13.52214],[52.41831,13.52214],[52.41844,13.52214],[52.41888,13.5216],[52.41956,13.52086],[52.4202,13.52066],[52.42084,13.52053],[52.42104,13.52019],[52.42134,13.51992],[52.42141,13.51952],[52.42202,13.51891],[52.42212,13.51878],[52.42225,13.51864],[52.42256,13.51857],[52.42289,13.51844],[52.42343,13.51878],[52.42394,13.51918],[52.42461,13.51958],[52.42472,13.51958],[52.42569,13.52019],[52.42596,13.52039],[52.42603,13.52039],[52.4261,13.52046],[52.42623,13.52046],[52.42623,13.52066],[52.4262,13.52073],[52.4262,13.52079],[52.42613,13.52093],[52.4261,13.52113],[52.42607,13.52133],[52.42603,13.52153],[52.426,13.52214],[52.42593,13.52315],[52.42593,13.52342],[52.42593,13.52362],[52.42596,13.52389],[52.42596,13.52402],[52.42586,13.52645],[52.42586,13.52651],[52.42583,13.52672],[52.42576,13.52799],[52.42559,13.53116],[52.42549,13.53297],[52.42512,13.53943],[52.42512,13.53984],[52.42488,13.54374],[52.42492,13.54408],[52.42492,13.54414],[52.42492,13.54428],[52.42492,13.54434],[52.42492,13.54448],[52.42488,13.54455],[52.42488,13.54468],[52.42478,13.54508],[52.42478,13.54522],[52.42478,13.54623],[52.42485,13.54778],[52.42492,13.54879],[52.42499,13.54946],[52.42502,13.54959],[52.42512,13.54986],[52.42515,13.55],[52.42515,13.55013],[52.42566,13.55417],[52.42566,13.55424],[52.42569,13.55437],[52.42499,13.55538],[52.42461,13.55585],[52.42428,13.55632],[52.4232,13.5578],[52.423,13.55814],[52.42215,13.55928],[52.42195,13.55962],[52.42178,13.55982],[52.42151,13.56022],[52.42111,13.56076],[52.41993,13.56244],[52.41919,13.56345],[52.41881,13.56399],[52.41817,13.56487],[52.41777,13.56547],[52.41736,13.56601],[52.41726,13.56615],[52.41682,13.56689],[52.41588,13.56843],[52.41575,13.56864],[52.41558,13.56857],[52.41558,13.5685],[52.41548,13.56843],[52.41537,13.56843],[52.415,13.5681],[52.41463,13.56783],[52.41436,13.56763],[52.41362,13.56709],[52.41345,13.56682],[52.41264,13.56601],[52.41247,13.56588],[52.41241,13.56581],[52.41183,13.56514],[52.41153,13.5648],[52.41085,13.56406],[52.41045,13.56352],[52.40967,13.56265],[52.40856,13.5613],[52.40809,13.56063],[52.40775,13.56009],[52.40768,13.55996],[52.40765,13.55996],[52.40721,13.55928],[52.40667,13.55841],[52.40661,13.55827],[52.40644,13.558],[52.40623,13.55767],[52.40603,13.55733],[52.40546,13.55639],[52.40509,13.55578],[52.40485,13.55545],[52.40445,13.55491],[52.40438,13.55477],[52.40418,13.5545],[52.4037,13.55383],[52.40337,13.55329],[52.4032,13.55302],[52.40303,13.55276],[52.40279,13.55235],[52.40252,13.55181],[52.40212,13.55094],[52.40192,13.5506],[52.40168,13.55013],[52.40121,13.54912],[52.40074,13.54798],[52.40037,13.54704],[52.4003,13.54683],[52.39979,13.54576],[52.39973,13.54556],[52.39959,13.54542],[52.39959,13.54569],[52.39925,13.54488],[52.39908,13.54441],[52.39858,13.54327],[52.3977,13.54165],[52.3977,13.54172],[52.39743,13.54125],[52.39699,13.54044],[52.39666,13.53984],[52.39645,13.53943],[52.39608,13.53869],[52.39591,13.53836],[52.39564,13.53762],[52.39541,13.53694],[52.39514,13.53614],[52.39504,13.53566]]},"12526":{"name":"Bohnsdorf","color":"var(--moss-500)","ring":[[52.39504,13.53566],[52.39514,13.53614],[52.39541,13.53694],[52.39564,13.53762],[52.39591,13.53836],[52.39608,13.53869],[52.39645,13.53943],[52.39666,13.53984],[52.39699,13.54044],[52.39743,13.54125],[52.3977,13.54172],[52.3977,13.54165],[52.39858,13.54327],[52.39908,13.54441],[52.39925,13.54488],[52.39959,13.54569],[52.39959,13.54542],[52.39973,13.54556],[52.39979,13.54576],[52.4003,13.54683],[52.40037,13.54704],[52.40074,13.54798],[52.40121,13.54912],[52.40168,13.55013],[52.40192,13.5506],[52.40212,13.55094],[52.40252,13.55181],[52.40279,13.55235],[52.40303,13.55276],[52.4032,13.55302],[52.40337,13.55329],[52.4037,13.55383],[52.40418,13.5545],[52.40438,13.55477],[52.40445,13.55491],[52.40485,13.55545],[52.40509,13.55578],[52.40546,13.55639],[52.40603,13.55733],[52.40623,13.55767],[52.40644,13.558],[52.40661,13.55827],[52.40667,13.55841],[52.40721,13.55928],[52.40765,13.55996],[52.40768,13.55996],[52.40775,13.56009],[52.40809,13.56063],[52.40856,13.5613],[52.40967,13.56265],[52.41045,13.56352],[52.41085,13.56406],[52.41153,13.5648],[52.41183,13.56514],[52.41241,13.56581],[52.41247,13.56588],[52.41264,13.56601],[52.41345,13.56682],[52.41362,13.56709],[52.41436,13.56763],[52.41463,13.56783],[52.415,13.5681],[52.41537,13.56843],[52.41548,13.56843],[52.41558,13.5685],[52.41558,13.56857],[52.41575,13.56864],[52.41527,13.56944],[52.4148,13.57018],[52.41453,13.57065],[52.41426,13.57099],[52.41382,13.5716],[52.41349,13.572],[52.41308,13.57261],[52.41315,13.57274],[52.41305,13.57287],[52.41295,13.57281],[52.41288,13.57281],[52.41268,13.57287],[52.41234,13.57301],[52.41204,13.57308],[52.41187,13.57314],[52.41183,13.57314],[52.41163,13.57335],[52.41146,13.57355],[52.40934,13.57489],[52.40917,13.57624],[52.40903,13.57718],[52.40897,13.57752],[52.40873,13.57792],[52.40846,13.57839],[52.40806,13.57906],[52.40731,13.58034],[52.40715,13.58061],[52.40674,13.58149],[52.4061,13.58283],[52.4061,13.58303],[52.40596,13.5833],[52.40586,13.5833],[52.40563,13.58371],[52.40499,13.58472],[52.40458,13.58532],[52.40418,13.58599],[52.40374,13.5866],[52.40364,13.5868],[52.4037,13.58687],[52.40364,13.58694],[52.40354,13.5868],[52.40232,13.58546],[52.40134,13.58431],[52.40114,13.58445],[52.40104,13.58451],[52.40094,13.58465],[52.40087,13.58472],[52.40067,13.58505],[52.40043,13.58539],[52.4,13.58579],[52.39962,13.5862],[52.39939,13.58647],[52.39946,13.58721],[52.39946,13.58761],[52.39956,13.58801],[52.39962,13.58822],[52.39966,13.58855],[52.39959,13.58862],[52.39881,13.58929],[52.39794,13.5899],[52.3978,13.58996],[52.3975,13.59017],[52.39723,13.5903],[52.39716,13.59037],[52.39723,13.5905],[52.3972,13.59104],[52.39693,13.59286],[52.39689,13.59299],[52.39672,13.59313],[52.39645,13.59313],[52.39608,13.59299],[52.39585,13.59313],[52.39561,13.59326],[52.39534,13.59313],[52.395,13.59299],[52.3947,13.59286],[52.39436,13.59266],[52.39399,13.59272],[52.39382,13.59279],[52.39382,13.59272],[52.39359,13.59171],[52.39335,13.59064],[52.39264,13.58828],[52.39251,13.58781],[52.3921,13.58599],[52.39193,13.58525],[52.39177,13.58445],[52.39166,13.58384],[52.39156,13.58351],[52.39146,13.5829],[52.39133,13.58229],[52.39123,13.58169],[52.39106,13.58068],[52.39089,13.5796],[52.39079,13.57893],[52.39069,13.57839],[52.39059,13.57785],[52.39048,13.57718],[52.39038,13.57664],[52.39025,13.57563],[52.39021,13.57543],[52.39018,13.57503],[52.39011,13.57435],[52.38984,13.57314],[52.38981,13.57281],[52.38968,13.57227],[52.38934,13.57072],[52.3893,13.57052],[52.38907,13.56944],[52.3888,13.56803],[52.3887,13.56736],[52.3886,13.56689],[52.3886,13.56682],[52.38846,13.56574],[52.38833,13.5652],[52.38822,13.56467],[52.38819,13.5644],[52.38812,13.56413],[52.38812,13.56399],[52.38812,13.56372],[52.38812,13.56339],[52.38816,13.56184],[52.38819,13.56063],[52.38822,13.55895],[52.38822,13.55881],[52.38826,13.55834],[52.38833,13.55578],[52.38836,13.55491],[52.38836,13.55437],[52.38839,13.55397],[52.38839,13.5537],[52.38843,13.55336],[52.38853,13.55161],[52.3886,13.54879],[52.38866,13.54744],[52.38866,13.54704],[52.38873,13.54535],[52.38876,13.54441],[52.3888,13.54273],[52.38883,13.54206],[52.38883,13.54186],[52.38883,13.54172],[52.38893,13.53809],[52.38893,13.53721],[52.389,13.53546],[52.38988,13.53513],[52.39079,13.53486],[52.39089,13.53486],[52.39143,13.53486],[52.3917,13.53486],[52.3921,13.53492],[52.39247,13.53499],[52.39332,13.53513],[52.39352,13.53513],[52.39369,13.53526],[52.39399,13.5354],[52.39409,13.5354],[52.3943,13.53546],[52.39504,13.53566]]},"12527":{"name":"Grünau","color":"var(--pond-600)","ring":[[52.42569,13.55437],[52.42573,13.55464],[52.42583,13.55444],[52.4259,13.55511],[52.42593,13.55538],[52.42593,13.55545],[52.4259,13.55551],[52.42586,13.55565],[52.42586,13.55585],[52.4265,13.56103],[52.4265,13.5611],[52.4265,13.56123],[52.4265,13.56144],[52.42647,13.56157],[52.42647,13.56164],[52.42654,13.56211],[52.42671,13.56339],[52.42684,13.56453],[52.42687,13.56453],[52.42687,13.5646],[52.42698,13.56487],[52.42698,13.56493],[52.42698,13.565],[52.42701,13.565],[52.42721,13.56662],[52.42738,13.5681],[52.42779,13.57133],[52.42782,13.57139],[52.42785,13.57153],[52.42789,13.57166],[52.42802,13.57261],[52.42802,13.57281],[52.42805,13.57281],[52.42809,13.57287],[52.42812,13.57335],[52.42839,13.57583],[52.42802,13.57651],[52.42745,13.57839],[52.42731,13.57873],[52.42718,13.579],[52.42704,13.57927],[52.42691,13.57947],[52.42677,13.57974],[52.4266,13.58001],[52.42644,13.58021],[52.42623,13.58048],[52.42593,13.58088],[52.42569,13.58108],[52.42546,13.58135],[52.42522,13.58149],[52.42502,13.58162],[52.42485,13.58169],[52.42458,13.58182],[52.42438,13.58189],[52.42414,13.58189],[52.42397,13.58189],[52.42347,13.58189],[52.4233,13.58196],[52.42306,13.58196],[52.42279,13.58203],[52.42256,13.58209],[52.42236,13.58216],[52.42212,13.58229],[52.42192,13.58243],[52.42168,13.58263],[52.42148,13.5829],[52.42128,13.58317],[52.42111,13.58344],[52.42094,13.58364],[52.4208,13.58384],[52.4206,13.58404],[52.42043,13.58418],[52.42023,13.58438],[52.41999,13.58451],[52.41976,13.58465],[52.41942,13.58478],[52.41922,13.58485],[52.41902,13.58485],[52.41875,13.58492],[52.41848,13.58485],[52.41814,13.58485],[52.41784,13.58478],[52.41726,13.58458],[52.41703,13.58458],[52.41676,13.58451],[52.41649,13.58451],[52.41622,13.58458],[52.41598,13.58465],[52.41578,13.58472],[52.41558,13.58485],[52.41534,13.58499],[52.41507,13.58519],[52.41483,13.58539],[52.41463,13.58566],[52.41446,13.58586],[52.41413,13.5864],[52.41399,13.58653],[52.41386,13.5868],[52.41369,13.58714],[52.41349,13.58748],[52.41335,13.58788],[52.41315,13.58828],[52.41305,13.58855],[52.41291,13.58896],[52.41278,13.58936],[52.41264,13.58996],[52.41254,13.59044],[52.41247,13.59077],[52.41244,13.59124],[52.41241,13.59171],[52.41237,13.59219],[52.41241,13.59252],[52.41241,13.59279],[52.41244,13.59299],[52.41251,13.59326],[52.41264,13.59393],[52.41281,13.59454],[52.41291,13.59501],[52.41298,13.59535],[52.41305,13.59575],[52.41308,13.59602],[52.41311,13.59669],[52.41318,13.59716],[52.41325,13.59831],[52.41328,13.59871],[52.41328,13.59905],[52.41328,13.59945],[52.41325,13.59972],[52.41322,13.60013],[52.41322,13.60033],[52.41315,13.6006],[52.41305,13.60093],[52.41291,13.60134],[52.41281,13.60161],[52.41274,13.60181],[52.4118,13.60389],[52.41106,13.60551],[52.41072,13.60652],[52.41052,13.60739],[52.41005,13.60914],[52.40981,13.61015],[52.40883,13.61365],[52.40876,13.61385],[52.40873,13.61405],[52.4087,13.61426],[52.4087,13.61446],[52.4087,13.61479],[52.40913,13.62132],[52.40924,13.623],[52.40924,13.62327],[52.40924,13.62354],[52.4092,13.62381],[52.40913,13.62408],[52.40907,13.62428],[52.409,13.62442],[52.40893,13.62462],[52.40887,13.62475],[52.4087,13.62509],[52.40836,13.62563],[52.40822,13.62576],[52.40806,13.62596],[52.40789,13.6261],[52.40775,13.6263],[52.40745,13.6265],[52.40721,13.62664],[52.40701,13.6267],[52.40674,13.62684],[52.40647,13.62691],[52.4061,13.62704],[52.40556,13.62724],[52.40546,13.62724],[52.40489,13.62738],[52.40468,13.62744],[52.40451,13.62751],[52.40424,13.62771],[52.40411,13.62785],[52.40397,13.62798],[52.40377,13.62825],[52.40259,13.6302],[52.40185,13.63141],[52.40077,13.6331],[52.39959,13.63114],[52.39956,13.63101],[52.39952,13.63094],[52.39952,13.63087],[52.39952,13.63074],[52.39952,13.63061],[52.39956,13.63047],[52.39962,13.63027],[52.39996,13.62953],[52.40003,13.62946],[52.4001,13.62939],[52.40016,13.62933],[52.4003,13.62926],[52.40043,13.62919],[52.40057,13.62913],[52.4007,13.62913],[52.4002,13.62583],[52.40016,13.62563],[52.4005,13.62542],[52.4003,13.62542],[52.40097,13.62495],[52.40067,13.62462],[52.39878,13.6224],[52.39851,13.62206],[52.39841,13.62193],[52.39868,13.62152],[52.39871,13.62145],[52.39868,13.62119],[52.39854,13.62024],[52.39851,13.62024],[52.39811,13.61984],[52.3979,13.62018],[52.3978,13.62031],[52.39763,13.62065],[52.39753,13.62085],[52.3975,13.62085],[52.39747,13.62085],[52.39612,13.6193],[52.39568,13.61876],[52.39369,13.61648],[52.39359,13.61634],[52.39028,13.61251],[52.38839,13.61029],[52.38812,13.60995],[52.38613,13.61452],[52.38489,13.61311],[52.38408,13.61217],[52.38344,13.61136],[52.38333,13.61129],[52.38158,13.60928],[52.38141,13.60907],[52.38108,13.60867],[52.37925,13.60652],[52.37915,13.60638],[52.37912,13.60638],[52.37915,13.60638],[52.37949,13.60611],[52.37973,13.60598],[52.38037,13.60544],[52.38094,13.60484],[52.38128,13.60436],[52.38165,13.60369],[52.38195,13.60342],[52.38239,13.60322],[52.38283,13.60302],[52.38313,13.60255],[52.38323,13.60241],[52.3835,13.60201],[52.38354,13.60194],[52.38374,13.60167],[52.38394,13.6014],[52.38404,13.601],[52.38414,13.60073],[52.38431,13.60046],[52.38452,13.60033],[52.38499,13.59972],[52.38529,13.59952],[52.38539,13.59938],[52.38543,13.59925],[52.38539,13.59898],[52.38553,13.59831],[52.38573,13.59716],[52.38597,13.59616],[52.3861,13.59602],[52.38657,13.59555],[52.38677,13.59535],[52.38725,13.59494],[52.38755,13.59488],[52.38816,13.59528],[52.38849,13.59528],[52.38876,13.59521],[52.38897,13.59501],[52.38897,13.59467],[52.38893,13.59434],[52.3891,13.5942],[52.38954,13.59407],[52.38968,13.59387],[52.38994,13.59367],[52.39021,13.59367],[52.39048,13.59367],[52.39082,13.59387],[52.39116,13.59387],[52.39163,13.594],[52.3921,13.5942],[52.39244,13.59414],[52.39254,13.59407],[52.39288,13.59373],[52.39322,13.5934],[52.39328,13.59333],[52.39355,13.59299],[52.39359,13.59299],[52.39369,13.59286],[52.39379,13.59279],[52.39382,13.59272],[52.39382,13.59279],[52.39399,13.59272],[52.39436,13.59266],[52.3947,13.59286],[52.395,13.59299],[52.39534,13.59313],[52.39561,13.59326],[52.39585,13.59313],[52.39608,13.59299],[52.39645,13.59313],[52.39672,13.59313],[52.39689,13.59299],[52.39693,13.59286],[52.3972,13.59104],[52.39723,13.5905],[52.39716,13.59037],[52.39723,13.5903],[52.3975,13.59017],[52.3978,13.58996],[52.39794,13.5899],[52.39881,13.58929],[52.39959,13.58862],[52.39966,13.58855],[52.39962,13.58822],[52.39956,13.58801],[52.39946,13.58761],[52.39946,13.58721],[52.39939,13.58647],[52.39962,13.5862],[52.4,13.58579],[52.40043,13.58539],[52.40067,13.58505],[52.40087,13.58472],[52.40094,13.58465],[52.40104,13.58451],[52.40114,13.58445],[52.40134,13.58431],[52.40232,13.58546],[52.40354,13.5868],[52.40364,13.58694],[52.4037,13.58687],[52.40364,13.5868],[52.40374,13.5866],[52.40418,13.58599],[52.40458,13.58532],[52.40499,13.58472],[52.40563,13.58371],[52.40586,13.5833],[52.40596,13.5833],[52.4061,13.58303],[52.4061,13.58283],[52.40674,13.58149],[52.40715,13.58061],[52.40731,13.58034],[52.40806,13.57906],[52.40846,13.57839],[52.40873,13.57792],[52.40897,13.57752],[52.40903,13.57718],[52.40917,13.57624],[52.40934,13.57489],[52.41146,13.57355],[52.41163,13.57335],[52.41183,13.57314],[52.41187,13.57314],[52.41204,13.57308],[52.41234,13.57301],[52.41268,13.57287],[52.41288,13.57281],[52.41295,13.57281],[52.41305,13.57287],[52.41315,13.57274],[52.41308,13.57261],[52.41349,13.572],[52.41382,13.5716],[52.41426,13.57099],[52.41453,13.57065],[52.4148,13.57018],[52.41527,13.56944],[52.41575,13.56864],[52.41588,13.56843],[52.41682,13.56689],[52.41726,13.56615],[52.41736,13.56601],[52.41777,13.56547],[52.41817,13.56487],[52.41881,13.56399],[52.41919,13.56345],[52.41993,13.56244],[52.42111,13.56076],[52.42151,13.56022],[52.42178,13.55982],[52.42195,13.55962],[52.42215,13.55928],[52.423,13.55814],[52.4232,13.5578],[52.42428,13.55632],[52.42461,13.55585],[52.42499,13.55538],[52.42569,13.55437]]}};
+
+  var LOCATIONS = [
+    { id:"kita", cat:"kita", geo:{query:"Zur Gartenstadt 239, 12526 Berlin, Germany", fallback:[52.40188,13.56861]}, verified:true, name:"Kita Zur Gartenstadt (Gartenstadtfrösche)",
+      address:"Zur Gartenstadt 239, 12526 Berlin-Bohnsdorf", phone:"030 67 82 45 03", hours:"Mo–Fr 6:00–18:00",
+      isStart:true,
+      desc:{
+        de:"Unsere Kita mitten im Grünen: Platz für 125 Kinder von 0 bis 6 Jahren in vier Gruppen. Im Projekt ACKER RACKER bauen die Kinder eigenes Gemüse an, es gibt frisches Essen aus der eigenen Küche und viel Raum zum Mitbestimmen.",
+        en:"Our preschool in the middle of the green: room for 125 children aged 0–6 in four groups. Through the ACKER RACKER project the children grow their own vegetables, meals are cooked fresh on site, and there's lots of room to help decide things.",
+        tr:"Kreşimiz yeşilliklerin ortasında: 0-6 yaş arası 125 çocuğa dört grupta yer var. ACKER RACKER projemizde çocuklar kendi sebzelerini yetiştiriyor, yemekler kendi mutfağımızda taze pişiriliyor ve çocuklara söz hakkı için çok yer var.",
+        ru:"Наш детский сад расположен среди зелени: четыре группы для 125 детей от 0 до 6 лет. В рамках проекта ACKER RACKER дети сами выращивают овощи, еда готовится свежей на собственной кухне, а у детей много возможностей участвовать в решениях.",
+        ar:"روضتنا تقع وسط الخضرة: تتسع لـ125 طفلاً من عمر صفر إلى 6 سنوات في أربع مجموعات. من خلال مشروع ACKER RACKER يزرع الأطفال خضرواتهم بأنفسهم، وتُطهى الوجبات طازجة في مطبخنا الخاص، وهناك مساحة كبيرة لمشاركة الأطفال في القرارات."
+      }},
+    { id:"jugendclub", cat:"jugend", geo:{query:"Schulzendorfer Straße 26, 12526 Berlin, Germany", fallback:[52.39862,13.58081]}, verified:true, name:"Jugendfreizeiteinrichtung „Kroh“",
+      address:"Schulzendorfer Str. 26, 12526 Berlin-Bohnsdorf", phone:"030 82071828", hours:"Mo–Fr 13:00–19:00, Sa 11:00–17:00",
+      desc:{
+        de:"Der Jugendclub Kroh ist Treffpunkt für Kinder und Jugendliche ab 8 Jahren: Nähen, Kochen, Fotografieren, Werkeln oder einfach Zeit mit Freund_innen verbringen.",
+        en:"The Kroh youth club is a meeting place for children and young people from age 8: sewing, cooking, photography, building things, or just spending time with friends.",
+        tr:"Kroh gençlik kulübü, 8 yaşından itibaren çocuklar ve gençler için bir buluşma yeri: dikiş, yemek pişirme, fotoğrafçılık, el işleri ya da sadece arkadaşlarla vakit geçirme.",
+        ru:"Молодёжный клуб «Kroh» – место встреч для детей и подростков от 8 лет: шитьё, кулинария, фотография, мастерская или просто время с друзьями.",
+        ar:"نادي «Kroh» للشباب هو مكان لقاء للأطفال واليافعين من سن 8 سنوات: خياطة، طبخ، تصوير، أعمال يدوية أو ببساطة قضاء الوقت مع الأصدقاء."
+      }},
+    { id:"schule", cat:"schule", geo:{query:"Schulzendorfer Straße 112, 12526 Berlin, Germany", fallback:[52.40611,13.57451]}, verified:true, name:"Schule am Buntzelberg",
+      address:"Schulzendorfer Str. 112, 12526 Berlin", phone:"030 676 39 43",
+      desc:{
+        de:"Die Grundschule mit eigenem Hort (eFöB) ist der nächste Schritt nach der Kita – wichtig für alle Familien, deren Kinder bald eingeschult werden.",
+        en:"The primary school with its own after-school care (eFöB) is the next step after preschool – important for every family whose child will soon start school.",
+        tr:"Kendi bakım programına (eFöB) sahip ilkokul, kreşten sonraki adımdır – yakında okula başlayacak her çocuğun ailesi için önemlidir.",
+        ru:"Начальная школа со своей группой продлённого дня (eFöB) – следующий шаг после детского сада, важный для семей, чьи дети скоро пойдут в школу.",
+        ar:"المدرسة الابتدائية مع برنامج الرعاية النهارية الخاص بها (eFöB) هي الخطوة التالية بعد الروضة – وهذا مهم لكل عائلة سيلتحق طفلها قريبًا بالمدرسة."
+      }},
+    { id:"bibliothek", cat:"bibliothek", geo:{query:"Dahmestraße 33, 12526 Berlin, Germany", fallback:[52.40156,13.57088]}, verified:true, name:"Stadtteilbibliothek Bohnsdorf",
+      address:"Dahmestr. 33, 12526 Berlin", hours:"Di, Do 13:00–19:00",
+      desc:{
+        de:"Bücher, Bilderbücher und ruhige Ecken zum Vorlesen – die Ausleihe ist kostenlos.",
+        en:"Books, picture books, and quiet corners for reading aloud – borrowing is free.",
+        tr:"Kitaplar, resimli kitaplar ve sesli okuma için sessiz köşeler – ödünç alma ücretsizdir.",
+        ru:"Книги, книжки с картинками и тихие уголки для чтения вслух – абонемент бесплатный.",
+        ar:"كتب وكتب مصوّرة وأركان هادئة للقراءة بصوت عالٍ – الاستعارة مجانية."
+      }},
+    { id:"kinderarzt", cat:"gesundheit", geo:{query:"Schwalbenweg 36, 12526 Berlin, Germany", fallback:[52.39825,13.5389]}, verified:true, name:"Kinderarztpraxis Dr. med. Katja Eckermann",
+      address:"Schwalbenweg 36, 12526 Berlin", phone:"030 672 14 04",
+      desc:{
+        de:"Kinder- und Jugendärztin direkt im Kiez – für Vorsorgeuntersuchungen (U-Untersuchungen), Impfungen und wenn Ihr Kind mal krank ist.",
+        en:"A pediatrician right in the neighborhood – for check-ups (U-exams), vaccinations, and whenever your child is unwell.",
+        tr:"Mahallenizde bir çocuk doktoru – muayeneler (U-muayeneleri), aşılar ve çocuğunuz hastalandığında.",
+        ru:"Детский врач прямо по соседству – для профилактических осмотров (U-обследования), прививок и на случай, если ребёнок заболеет.",
+        ar:"طبيب أطفال في الحي مباشرة – لإجراء الفحوصات الدورية (U)، والتطعيمات، وعند مرض طفلكم."
+      }},
+    { id:"spielplatz", cat:"spiel", geo:{query:"Eisenbahn Spielplatz, Bohnsdorf, Berlin, Germany", fallback:[52.39894,13.56603]}, verified:true, name:"Eisenbahn Spielplatz",
+      address:"Bohnsdorf, an der ehemaligen Bahntrasse", plz:"12526",
+      desc:{
+        de:"Ein Spielplatz mit Eisenbahn-Thema auf einer ehemaligen Bahntrasse: mit Bahnhofstoren, Gleisen zum Balancieren und einer kleinen Lok zum Klettern.",
+        en:"A railway-themed playground on a former train line: with station-style gates, tracks to balance on, and a small locomotive to climb.",
+        tr:"Eski bir tren hattı üzerinde tren temalı bir oyun alanı: istasyon kapıları, denge için raylar ve tırmanılacak küçük bir lokomotif ile.",
+        ru:"Детская площадка «Eisenbahn» в железнодорожном стиле на месте бывшей железной дороги: с арками в виде вокзала, рельсами для баланса и маленьким паровозом для лазания.",
+        ar:"ملعب بطابع القطارات على مسار سكة حديد سابق: ببوابات على طراز المحطات، وقضبان للمشي عليها، وقاطرة صغيرة للتسلق."
+      }},
+    { id:"kirche", cat:"gemeinde", geo:{query:"Dorfkirche Bohnsdorf, Dorfplatz, 12526 Berlin, Germany", fallback:[52.39952,13.55588]}, verified:true, name:"Dorfkirche & Ev. Kirchengemeinde Bohnsdorf-Grünau",
+      address:"Dorfplatz, 12526 Berlin-Bohnsdorf",
+      desc:{
+        de:"Die historische Dorfkirche am Dorfplatz ist mehr als ein Gotteshaus: Die Kirchengemeinde bietet auch Christenlehre und Angebote für Familien im Kiez.",
+        en:"The historic village church on the Dorfplatz is more than a place of worship: the parish also offers religious education for children and activities for families.",
+        tr:"Dorfplatz'taki tarihi köy kilisesi bir ibadet yerinden fazlasıdır: cemaat ayrıca çocuklar için din dersleri ve mahalledeki aileler için etkinlikler sunar.",
+        ru:"Историческая деревенская церковь на Dorfplatz – это больше, чем место богослужения: приход также предлагает занятия для детей и мероприятия для семей.",
+        ar:"كنيسة القرية التاريخية في ساحة Dorfplatz هي أكثر من مكان للعبادة: تقدّم الرعية أيضًا دروسًا دينية للأطفال وأنشطة للعائلات."
+      }},
+    { id:"krankenhaus", cat:"gesundheit", geo:{query:"Höhensteig 1, 12526 Berlin, Germany", fallback:[52.40539,13.56925]}, verified:true, name:"Alexianer Krankenhaus Hedwigshöhe",
+      address:"Höhensteig 1, 12526 Berlin-Bohnsdorf", phone:"030 6741-0",
+      desc:{
+        de:"Ein richtiges Krankenhaus mitten in Bohnsdorf: mit Notaufnahme, Innerer Medizin, Chirurgie, Orthopädie und einer psychiatrischen Abteilung. Wichtig zu kennen für den Ernstfall – auch für Familien in der Nachbarschaft.",
+        en:"A full hospital right in the middle of Bohnsdorf: with an emergency room, internal medicine, surgery, orthopedics, and a psychiatric department. Good to know about in case of an emergency – for families nearby too.",
+        tr:"Bohnsdorf'un tam ortasında gerçek bir hastane: acil servis, iç hastalıkları, cerrahi, ortopedi ve bir psikiyatri bölümüyle. Acil durumlar için bilinmesi önemli – çevredeki aileler için de.",
+        ru:"Настоящая больница прямо в центре Бонсдорфа: с приёмным отделением, терапией, хирургией, ортопедией и психиатрическим отделением. Важно знать на случай экстренной ситуации – это касается и семей по соседству.",
+        ar:"مستشفى حقيقي في قلب حي Bohnsdorf: يضم قسم طوارئ، وطب باطني، وجراحة، وطب عظام، وقسمًا للطب النفسي. من المهم معرفته في حالات الطوارئ – وهذا يشمل العائلات في الجوار أيضًا."
+      }},
+    { id:"hausarzt", cat:"gesundheit", geo:{query:"Krumme Straße 10A, 12526 Berlin, Germany", fallback:[52.40026,13.57269]}, verified:true, name:"Hausarztpraxis Bohnsdorf (Dr. Eklund & Dr. Lorkowski)",
+      address:"Krumme Str. 10A, 12526 Berlin-Bohnsdorf", phone:"030 67 63 296",
+      desc:{
+        de:"Eine Hausarztpraxis mit zwei Ärztinnen direkt im Kiez – für die ganze Familie, auch mit Akutsprechstunden. Außerhalb der Sprechzeiten hilft der ärztliche Bereitschaftsdienst unter 116 117.",
+        en:"A family doctor's practice with two physicians right in the neighborhood – for the whole family, including urgent same-day slots. Outside opening hours, the medical on-call service can be reached at 116 117.",
+        tr:"Mahallede iki kadın doktorun bulunduğu bir aile hekimliği muayenehanesi – tüm aile için, acil randevularla birlikte. Muayene saatleri dışında nöbetçi hekim hattı 116 117'den ulaşılabilir.",
+        ru:"Врачебная практика с двумя терапевтами прямо по соседству – для всей семьи, включая срочные приёмы. Вне часов приёма можно обратиться в дежурную медицинскую службу по номеру 116 117.",
+        ar:"عيادة طبيب عائلة بها طبيبتان في الحي مباشرة – لجميع أفراد الأسرة، مع مواعيد للحالات العاجلة أيضًا. خارج ساعات الدوام يمكن الاتصال بخدمة الطوارئ الطبية على الرقم 116 117."
+      }},
+    { id:"zahnarzt", cat:"gesundheit", geo:{query:"Buntzelstraße 21a, 12526 Berlin, Germany", fallback:[52.40836,13.57377]}, verified:true, name:"Zahnarztpraxis Karoline Eltiri-Lange",
+      address:"Buntzelstr. 21a, 12526 Berlin-Bohnsdorf", phone:"030 676 10 14",
+      desc:{
+        de:"Eine Zahnarztpraxis im Kiez – für die zahnärztliche Vorsorge und Behandlung der ganzen Familie, von den ersten Milchzähnen an.",
+        en:"A dental practice in the neighborhood – for checkups and treatment for the whole family, starting with baby teeth.",
+        tr:"Mahalledeki bir diş hekimi muayenehanesi – süt dişlerinden itibaren tüm ailenin diş bakımı ve tedavisi için.",
+        ru:"Стоматологическая практика по соседству – для профилактики и лечения зубов всей семьи, начиная с молочных зубов.",
+        ar:"عيادة أسنان في الحي – للفحوصات والعلاج لجميع أفراد الأسرة، بدءًا من الأسنان اللبنية."
+      }},
+    { id:"psychotherapie", cat:"gesundheit", geo:{query:"Richterstraße 12, 12526 Berlin, Germany", fallback:[52.41193,13.5737]}, verified:true, name:"Psychologische Psychotherapie Esther-Maria Mies",
+      address:"Richterstr. 12, 12526 Berlin-Bohnsdorf", phone:"0172 3 22 82 22",
+      desc:{
+        de:"Eine psychologische Psychotherapeutin im Kiez – bei seelischen Belastungen, Ängsten oder in schwierigen Lebensphasen kann professionelle Unterstützung sehr helfen, auch für Eltern.",
+        en:"A psychological psychotherapist right in the neighborhood – professional support can help a lot with emotional strain, anxiety, or difficult life phases, for parents too.",
+        tr:"Mahalledeki bir psikolojik psikoterapist – ruhsal yükler, kaygılar veya zorlu yaşam dönemlerinde profesyonel destek, ebeveynler için de çok yardımcı olabilir.",
+        ru:"Психологический психотерапевт по соседству – профессиональная поддержка может очень помочь при эмоциональных нагрузках, тревоге или в трудные периоды жизни, в том числе родителям.",
+        ar:"معالجة نفسية في الحي – يمكن للدعم المتخصص أن يساعد كثيرًا في حالات الضغط النفسي أو القلق أو المراحل الصعبة في الحياة، وهذا يشمل الآباء أيضًا."
+      }},
+    { id:"kulturkueche", cat:"gemeinde", geo:{query:"Dahmestraße 33, 12526 Berlin, Germany", fallback:[52.40156,13.57088]}, verified:true, name:"Kulturküche Bohnsdorf",
+      address:"Dahmestr. 33, 12526 Berlin (im KiezCentrum, gemeinsam mit der Bibliothek)", phone:"030 67 89 61 91",
+      desc:{
+        de:"Ein soziokulturelles Zentrum im selben Haus wie die Bibliothek: mit Ausstellungen, Konzerten, Figurentheater und Kindermusik-Programmen sowie Kursen in Kunst, Tanz und Akrobatik für verschiedene Altersgruppen.",
+        en:"A sociocultural center in the same building as the library: with exhibitions, concerts, puppet theater and children's music programs, plus art, dance, and acrobatics courses for various age groups.",
+        tr:"Kütüphaneyle aynı binada bulunan sosyokültürel bir merkez: sergiler, konserler, kukla tiyatrosu ve çocuklar için müzik programlarının yanı sıra farklı yaş grupları için sanat, dans ve akrobasi kursları sunar.",
+        ru:"Социокультурный центр в том же здании, что и библиотека: с выставками, концертами, кукольным театром и музыкальными программами для детей, а также курсами искусства, танца и акробатики для разных возрастов.",
+        ar:"مركز اجتماعي وثقافي في نفس مبنى المكتبة: يقدّم معارض وحفلات موسيقية ومسرح دمى وبرامج موسيقية للأطفال، بالإضافة إلى دورات فنية ودورات رقص وأكروبات لمختلف الأعمار."
+      }},
+    { id:"kiezklub", cat:"gemeinde", geo:{query:"Dahmestraße 33, 12526 Berlin, Germany", fallback:[52.40156,13.57088]}, verified:true, name:"Kiezklub Bohnsdorf",
+      address:"Dahmestr. 33, 12526 Berlin (im KiezCentrum)", phone:"030 67 89 50 91",
+      desc:{
+        de:"Ein wichtiger Treffpunkt im dünn besiedelten Bohnsdorf seit über 25 Jahren: von Line Dance über gemütliches Kaffeetrinken bis Yoga und Tai Chi – offen für Seniorinnen und Senioren, Frauen, Männer und Menschen mit Fluchterfahrung.",
+        en:"An important meeting place in sparsely populated Bohnsdorf for over 25 years: from line dancing to coffee gatherings to yoga and tai chi – open to seniors, women, men, and people who have experienced displacement.",
+        tr:"Nüfusu az olan Bohnsdorf'ta 25 yılı aşkın süredir önemli bir buluşma noktası: line dance'ten keyifli kahve sohbetlerine, yoga ve tai chi'ye kadar – yaşlılara, kadınlara, erkeklere ve göç deneyimi olan kişilere açık.",
+        ru:"Важное место встреч в малонаселённом Бонсдорфе на протяжении более 25 лет: от лайн-дэнса до посиделок за кофе, йоги и тай-чи – открыто для пожилых людей, женщин, мужчин и людей, переживших вынужденное переселение.",
+        ar:"مكان لقاء مهم في حي Bohnsdorf قليل السكان منذ أكثر من 25 عامًا: من رقصة اللاين دانس إلى جلسات القهوة واليوغا والتاي تشي – مفتوح لكبار السن والنساء والرجال والأشخاص الذين عاشوا تجربة النزوح."
+      }},
+    { id:"spielplatz_hundsfelder", cat:"spiel", geo:{query:"Ringelblumenweg 2, 12526 Berlin, Germany", fallback:[52.40675,13.56434]}, verified:true, name:"Spielplatz Ringelblumenweg",
+      address:"Ringelblumenweg 2, 12526 Berlin",
+      desc:{
+        de:"Ein weiterer Spielplatz im Kiez, mitten in einem Wohngebiet von Bohnsdorf – gut zu Fuß erreichbar für einen spontanen Ausflug nach der Kita.",
+        en:"Another neighborhood playground, right in the middle of a Bohnsdorf residential area – an easy walk for a spontaneous outing after preschool.",
+        tr:"Mahalledeki bir başka oyun alanı, Bohnsdorf'taki bir yerleşim bölgesinin tam ortasında – kreşten sonra kısa bir gezinti için yürüyerek kolayca ulaşılabilir.",
+        ru:"Ещё одна детская площадка по соседству, прямо посреди жилого района Бонсдорфа – легко дойти пешком для спонтанной прогулки после детского сада.",
+        ar:"ملعب آخر في الحي، في وسط منطقة سكنية في Bohnsdorf – يمكن الوصول إليه سيرًا على الأقدام بسهولة لنزهة عفوية بعد الروضة."
+      }},
+    { id:"spielplatz_hoehensteig", cat:"spiel", geo:{query:"Lindenblütenstraße 25, 12526 Berlin, Germany", fallback:[52.40724,13.56716]}, verified:true, name:"Adlerspielplatz",
+      address:"Lindenblütenstraße 25, 12526 Berlin-Bezirk Treptow-Köpenick",
+      desc:{
+        de:"Ein kürzlich saniertes Spielgelände im Grünzug Falkenberg, unweit des Krankenhauses – Platz zum Toben mitten im Grünen.",
+        en:"A recently renovated play area in the Grünzug Falkenberg green corridor, not far from the hospital – space to run around surrounded by greenery.",
+        tr:"Grünzug Falkenberg yeşil koridorunda, hastaneye yakın, yakın zamanda yenilenmiş bir oyun alanı – yeşilliklerin ortasında koşup oynamak için bir yer.",
+        ru:"Недавно отремонтированная игровая площадка в зелёном коридоре Grünzug Falkenberg, недалеко от больницы – место для беготни среди зелени.",
+        ar:"منطقة لعب جُدّدت مؤخرًا في الممر الأخضر Grünzug Falkenberg، على مقربة من المستشفى – مساحة للعب وسط الخضرة."
+      }}
+  ];
+
+  var OFFMAP = [
+    { id:"familienservicebuero", cat:"amt", geo:{query:"Groß-Berliner Damm 154, 12489 Berlin, Germany", fallback:[52.43376,13.53176]}, verified:true, name:"Jugendamt – Familienservicebüro Treptow-Köpenick",
+      address:"Groß-Berliner Damm 154, 12489 Berlin (Adlershof/Johannisthal)", phone:"030 90297 2222", hours:"Mo, Di 9:00–12:00 & 13:00–15:00, Do 14:00–18:00, Fr 9:00–12:00",
+      desc:{
+        de:"Die erste Anlaufstelle im Jugendamt für ganz praktische Fragen: Elterngeld, Kita-Gutschein, Hortplatz, Sorgerecht, Unterhaltsvorschuss oder einfach eine erste Orientierung. Niedrigschwellig und ohne großen Aufwand.",
+        en:"The first stop at the youth welfare office for practical questions: parental allowance, childcare vouchers, after-school care places, custody, advance maintenance payments, or just general orientation. Low-threshold and uncomplicated.",
+        tr:"Gençlik dairesinde pratik sorularınız için ilk başvuru noktası: ebeveyn ödeneği, kreş kuponu, bakım yeri, velayet, nafaka avansı ya da genel bilgi almak için. Kolay erişilebilir ve az bürokratik.",
+        ru:"Первая инстанция в ведомстве по делам молодёжи по практическим вопросам: родительское пособие, ваучер на детский сад, место в продлёнке, опека, авансовые алименты или просто общая консультация. Низкий порог обращения, без лишней бюрократии.",
+        ar:"أول نقطة اتصال في مكتب رعاية الشباب للأسئلة العملية: إعانة الوالدين، قسيمة الروضة، مكان في الرعاية النهارية، الحضانة، سلفة النفقة، أو ببساطة توجيه عام. يمكن الوصول إليه بسهولة ودون تعقيد."
+      }},
+    { id:"asd", cat:"amt", geo:{query:"Groß-Berliner Damm 154, 12489 Berlin, Germany", fallback:[52.43376,13.53176]}, verified:true, name:"Regionaler Sozialer Dienst (Jugendamt) – Region 3",
+      address:"Groß-Berliner Damm 154, 12489 Berlin — zuständig für Altglienicke, Bohnsdorf, Grünau, Schmöckwitz", phone:"030 90297 4929",
+      desc:{
+        de:"Dieses Team des Jugendamts ist genau für unseren Kiez zuständig – für Altglienicke, Bohnsdorf, Grünau und Schmöckwitz. Hierhin wenden sich Familien und Fachkräfte bei Sorgen um das Wohl eines Kindes. Rund um die Uhr erreichbar ist außerdem das Kinderschutz-Krisentelefon: 030 90297 5555.",
+        en:"This youth welfare team is responsible specifically for our neighborhood – Altglienicke, Bohnsdorf, Grünau, and Schmöckwitz. Families and professionals turn here with concerns about a child's wellbeing. The child-protection crisis line is also reachable around the clock: 030 90297 5555.",
+        tr:"Bu gençlik dairesi ekibi tam olarak bizim mahallemizden sorumludur – Altglienicke, Bohnsdorf, Grünau ve Schmöckwitz. Aileler ve uzmanlar bir çocuğun iyiliğiyle ilgili endişelerinde buraya başvurur. Çocuk koruma kriz hattına da 7/24 ulaşılabilir: 030 90297 5555.",
+        ru:"Эта команда ведомства по делам молодёжи отвечает именно за наш район – Альтглинике, Бонсдорф, Грюнау и Шмёквиц. Сюда обращаются семьи и специалисты с опасениями за благополучие ребёнка. Круглосуточно также доступна кризисная линия по защите детей: 030 90297 5555.",
+        ar:"هذا الفريق التابع لمكتب رعاية الشباب مسؤول تحديدًا عن حيّنا – Altglienicke وBohnsdorf وGrünau وSchmöckwitz. تلجأ إليه العائلات والمختصون عند القلق بشأن سلامة أحد الأطفال. كما يمكن الوصول على مدار الساعة إلى خط أزمات حماية الطفل: 030 90297 5555."
+      }},
+    { id:"erziehungsberatung", cat:"amt", geo:{query:"Haeckelstraße 4, 12487 Berlin, Germany", fallback:[52.4404,13.50512]}, verified:true, name:"Erziehungs- und Familienberatung Treptow-Köpenick",
+      address:"Haeckelstraße 4, 12487 Berlin (Alt-Treptow/Johannisthal)", phone:"030 90297 5460",
+      desc:{
+        de:"Bei Fragen rund um Erziehung, Trennung oder in Konfliktsituationen berät diese Stelle kostenlos, vertraulich und ohne Überweisung – telefonisch oder online. Der Standort liegt außerhalb dieses Plans, ist aber gut mit der S-Bahn erreichbar.",
+        en:"For questions about parenting, separation, or conflicts, this office offers free, confidential support by phone or online – no referral needed. It's located outside this map, but easy to reach by S-Bahn.",
+        tr:"Ebeveynlik, ayrılık veya çatışma durumlarıyla ilgili sorularınızda bu merkez telefonla veya çevrimiçi olarak ücretsiz, gizli ve sevk gerekmeden destek sunar. Bu harita dışında yer alır, ancak S-Bahn ile kolayca ulaşılabilir.",
+        ru:"По вопросам воспитания, развода или конфликтных ситуаций этот центр предлагает бесплатную, конфиденциальную помощь по телефону или онлайн – направление не требуется. Находится за пределами этой карты, но легко добраться на S-Bahn.",
+        ar:"بخصوص الأسئلة المتعلقة بالتربية أو الانفصال أو حالات النزاع، يقدّم هذا المركز دعمًا مجانيًا وسريًا عبر الهاتف أو عبر الإنترنت دون الحاجة إلى إحالة. يقع خارج هذه الخريطة، لكن يمكن الوصول إليه بسهولة عبر القطار الخفيف S-Bahn."
+      }},
+    { id:"gesundheitsdienst", cat:"gesundheit", geo:{query:"Ortolfstraße 182, 12524 Berlin, Germany", fallback:[52.40345,13.52824]}, verified:true, name:"Kinder- und Jugendgesundheitsdienst (Gesundheitsamt)",
+      address:"Ortolfstr. 182–184, 12524 Berlin (Altglienicke)", phone:"030 90297 3781",
+      desc:{
+        de:"Der kinder- und jugendärztliche Dienst des Gesundheitsamtes untersucht z. B. bei der Einschulung und berät Familien und Kitas kostenlos zu Entwicklung, Impfungen und Gesundheitsfragen. Zuständig für Altglienicke, Adlershof und Bohnsdorf.",
+        en:"The public health office's children's health service does check-ups such as the school-entry exam and gives free advice to families and preschools on development, vaccinations, and health questions. Responsible for Altglienicke, Adlershof, and Bohnsdorf.",
+        tr:"Sağlık dairesinin çocuk ve gençlik sağlık hizmeti, örneğin okula başlama muayenesini yapar ve ailelere ile kreşlere gelişim, aşılar ve sağlık konularında ücretsiz danışmanlık sunar. Altglienicke, Adlershof ve Bohnsdorf'tan sorumludur.",
+        ru:"Служба детского и подросткового здоровья при управлении здравоохранения проводит, например, осмотр перед поступлением в школу и бесплатно консультирует семьи и детские сады по вопросам развития, прививок и здоровья. Отвечает за районы Альтглинике, Адлерсхоф и Бонсдорф.",
+        ar:"تُجري خدمة صحة الأطفال واليافعين التابعة لمكتب الصحة فحوصات مثل فحص الالتحاق بالمدرسة، وتقدّم استشارات مجانية للعائلات ورياض الأطفال حول النمو والتطعيمات والمسائل الصحية. وهي مسؤولة عن Altglienicke وAdlershof وBohnsdorf."
+      }},
+    { id:"familienbegegnungszentrum", cat:"beratung", geo:{query:"Köpenicker Straße 42, 12524 Berlin, Germany", fallback:[52.42126,13.53938]}, verified:true, name:"Familienbegegnungszentrum Altglienicke",
+      address:"Köpenicker Str. 42, 12524 Berlin (Altglienicke)",
+      desc:{
+        de:"Ein offener Treffpunkt für Familien im Nachbar-Kiez Altglienicke: Eltern-Kind-Gruppen, Café-Atmosphäre zum Austauschen und niedrigschwellige Beratung – ein Stück weiter weg, aber gut mit dem Bus erreichbar.",
+        en:"An open meeting place for families in neighboring Altglienicke: parent-child groups, a café-style space to connect with other parents, and low-threshold advice – a bit further away, but easy to reach by bus.",
+        tr:"Komşu semt Altglienicke'de aileler için açık bir buluşma noktası: ebeveyn-çocuk grupları, diğer ebeveynlerle tanışmak için kafe ortamı ve kolay erişilebilir danışmanlık – biraz daha uzakta ama otobüsle rahatça ulaşılabilir.",
+        ru:"Открытое место встреч для семей в соседнем районе Альтглинике: группы для родителей с детьми, кафе-атмосфера для общения с другими родителями и доступные консультации – немного дальше, но легко добраться на автобусе.",
+        ar:"مكان لقاء مفتوح للعائلات في الحي المجاور Altglienicke: مجموعات للآباء والأطفال، وأجواء شبيهة بالمقهى للتواصل مع أهالٍ آخرين، واستشارات يسهل الوصول إليها – أبعد قليلاً، لكن يمكن الوصول إليه بسهولة بالحافلة."
+      }},
+    { id:"hallo_baby", cat:"beratung", geo:{query:"Ortolfstraße 182, 12524 Berlin, Germany", fallback:[52.40338,13.52823]}, verified:true, name:"„Hallo Baby“ – Beratung rund um Geburt und Baby",
+      address:"Bürgerhaus Altglienicke, Ortolfstr. 182, 12524 Berlin (auch im Familienbegegnungszentrum, Köpenicker Str. 42)", phone:"0176 76 49 02 82 / 0179 60 26 644",
+      desc:{
+        de:"Beratung rund um Schwangerschaft und das erste Lebensjahr: Familienhebammen, offene Schwangerentreffs und Hilfe bei Anträgen – ausdrücklich auch für Familien aus dem Bohnsdorfer Einzugsgebiet.",
+        en:"Counseling around pregnancy and the first year of life: family midwives, open groups for expecting parents, and help with paperwork – explicitly also for families from the Bohnsdorf catchment area.",
+        tr:"Hamilelik ve yaşamın ilk yılıyla ilgili danışmanlık: aile ebeleri, hamileler için açık buluşma grupları ve başvurularda yardım – Bohnsdorf'un hizmet bölgesindeki aileler için de özellikle sunulmaktadır.",
+        ru:"Консультации по вопросам беременности и первого года жизни: семейные акушерки, открытые встречи для беременных и помощь с заявлениями – специально также для семей из зоны обслуживания Бонсдорфа.",
+        ar:"استشارات حول الحمل والسنة الأولى من حياة الطفل: قابلات أسرية، ولقاءات مفتوحة للحوامل، ومساعدة في تقديم الطلبات – وهي مخصصة أيضًا بشكل صريح للعائلات من منطقة خدمة Bohnsdorf."
+      }},
+    { id:"bibliothek_altglienicke", cat:"bibliothek", geo:{query:"Ortolfstraße 182, 12524 Berlin, Germany", fallback:[52.40336,13.52817]}, verified:true, name:"Stadtteilbibliothek Altglienicke",
+      address:"Ortolfstr. 182, 12524 Berlin (im Bürgerhaus Altglienicke)", phone:"030 90297 6722", hours:"Mo, Fr 10:00–16:00, Di, Do 12:00–18:00, Mi geschlossen",
+      desc:{
+        de:"Eine zweite Stadtteilbibliothek im Sozialraum, gleich im Bürgerhaus Altglienicke – mit Kinderbuchecke und Vorlesestunden.",
+        en:"A second neighborhood library in our social space, right in the Bürgerhaus Altglienicke – with a children's book corner and story time.",
+        tr:"Sosyal alanımızdaki ikinci mahalle kütüphanesi, Bürgerhaus Altglienicke içinde – çocuk kitapları köşesi ve okuma saatleriyle.",
+        ru:"Вторая районная библиотека в нашем социальном пространстве, прямо в Bürgerhaus Altglienicke – с уголком детских книг и часами чтения вслух.",
+        ar:"مكتبة حي ثانية في محيطنا الاجتماعي، داخل Bürgerhaus Altglienicke – بها ركن لكتب الأطفال وجلسات قراءة."
+      }},
+    { id:"waslala", cat:"spiel", geo:{query:"Venusstraße 88, 12524 Berlin, Germany", fallback:[52.40475,13.53278]}, verified:true, name:"Abenteuerspielplatz und Kinderbauernhof Waslala",
+      address:"Venusstr. 88, 12524 Berlin (Altglienicke)", phone:"030 67909356",
+      desc:{
+        de:"Ein Abenteuerspielplatz mit echtem Kinderbauernhof: Tiere versorgen, Feuer machen, bauen und toben – ein beliebtes Ausflugsziel für Familien aus der ganzen Umgebung.",
+        en:"An adventure playground with a real children's farm: caring for animals, campfires, building, and rough-and-tumble play – a popular destination for families from the whole area.",
+        tr:"Gerçek bir çocuk çiftliğine sahip macera oyun alanı: hayvanlara bakmak, ateş yakmak, inşa etmek ve oynamak – çevredeki tüm aileler için popüler bir gezi noktası.",
+        ru:"Приключенческая игровая площадка с настоящей детской фермой: уход за животными, костры, стройки и подвижные игры – популярное место для семей со всей округи.",
+        ar:"ملعب مغامرات به مزرعة حيوانات حقيقية للأطفال: رعاية الحيوانات، إشعال النار، البناء واللعب الحر – وجهة محببة للعائلات من كل المنطقة المحيطة."
+      }},
+    { id:"gruenauer_schule", cat:"schule", geo:{query:"Walchenseestraße 40, 12527 Berlin, Germany", fallback:[52.41936,13.57601]}, verified:true, name:"Grünauer Schule (Gemeinschaftsschule mit Grundschule)",
+      address:"Walchenseestr. 40, 12527 Berlin (Grünau)",
+      desc:{
+        de:"Eine Gemeinschaftsschule mit eigener Grundschulstufe im Ortsteil Grünau – für Familien im südlichen Teil des Sozialraums eine Alternative zur Schule am Buntzelberg.",
+        en:"A community school with its own primary level in the Grünau neighborhood – an alternative to Schule am Buntzelberg for families living in the southern part of our social space.",
+        tr:"Grünau semtinde kendi ilkokul kademesine sahip bir toplum okulu – sosyal alanın güney kısmında yaşayan aileler için Schule am Buntzelberg'e bir alternatif.",
+        ru:"Общеобразовательная школа со своей начальной ступенью в районе Грюнау – альтернатива школе Schule am Buntzelberg для семей, живущих в южной части нашего социального пространства.",
+        ar:"مدرسة مجتمعية بمرحلة ابتدائية خاصة بها في حي Grünau – بديل عن مدرسة Schule am Buntzelberg للعائلات التي تسكن في الجزء الجنوبي من محيطنا الاجتماعي."
+      }},
+    { id:"buergerhaus_gruenau", cat:"gemeinde", geo:{query:"Regattastraße 191, 12527 Berlin, Germany", fallback:[52.41251,13.58543]}, verified:true, name:"Bürgerhaus Grünau",
+      address:"Regattastraße 191, 12527 Berlin-Bezirk Treptow-Köpenick",
+      desc:{
+        de:"Ein Kulturhaus direkt an der Dahme mit Kursen für Kinder, Ausstellungen und einem generationenübergreifenden Treffpunkt, an dem sich Kinder, Eltern und Großeltern begegnen.",
+        en:"A cultural house right on the Dahme river with courses for children, exhibitions, and a meeting place across generations where children, parents, and grandparents come together.",
+        tr:"Dahme nehri kıyısında, çocuklar için kurslar, sergiler ve çocukların, ebeveynlerin ve büyükanne-büyükbabaların bir araya geldiği kuşaklar arası bir buluşma noktası sunan bir kültür merkezi.",
+        ru:"Дом культуры прямо на реке Даме с курсами для детей, выставками и местом встреч разных поколений, где собираются дети, родители и бабушки с дедушками.",
+        ar:"بيت ثقافي على ضفاف نهر Dahme مباشرة يقدّم دورات للأطفال ومعارض ومكان لقاء بين الأجيال يجتمع فيه الأطفال والآباء والأجداد."
+      }},
+    { id:"schiffsspielplatz", cat:"spiel", geo:{query:"Ammerseestraße 31, 12527 Berlin, Germany", fallback:[52.41645,13.57558]}, verified:true, name:"Schiffsspielplatz im Park bei S-Grünau",
+      address:"Ammerseestr. 31, 12527 Berlin (Grünau)",
+      desc:{
+        de:"Ein Spielplatz mit einem großen Schiff zum Klettern und Schaukeln, Kletterturm mit Hängebrücke und Rutsche – nur wenige Schritte vom S-Bahnhof Grünau entfernt.",
+        en:"A playground with a big ship to climb and rock on, a climbing tower with a hanging bridge and slide – just steps from Grünau S-Bahn station.",
+        tr:"Tırmanılacak ve sallanacak büyük bir gemi, asma köprülü tırmanma kulesi ve kaydırak bulunan bir oyun alanı – Grünau S-Bahn istasyonuna sadece birkaç adım uzaklıkta.",
+        ru:"Детская площадка с большим кораблём для лазания и качания, башней с подвесным мостом и горкой – всего в нескольких шагах от станции S-Bahn Grünau.",
+        ar:"ملعب فيه سفينة كبيرة للتسلق والتأرجح، وبرج تسلق بجسر معلّق وزحليقة – على بعد خطوات قليلة من محطة S-Bahn Grünau."
+      }},
+    { id:"stadtteilmuetter", cat:"migration", geo:{query:"Ortolfstraße 164, 12524 Berlin, Germany", fallback:[52.40439,13.5293]}, verified:true, name:"Stadtteilmütter Treptow-Köpenick – KJFZ „Im Kosmosviertel“",
+      address:"Kinder-, Jugend- und Familienzentrum „Im Kosmosviertel“, Ortolfstr. 164, 12524 Berlin (Altglienicke)", phone:"0176 12 00 44 73 (Koordination: Carmen Kalisch)",
+      desc:{
+        de:"Von hier aus koordiniert, besuchen und begleiten Stadtteilmütter Familien mit Migrationshintergrund persönlich – auf Arabisch, Kurdisch, Türkisch und weiteren Sprachen. Sie erklären, wie Kita, Schule und Ämter funktionieren, und begleiten bei Bedarf zu Terminen.",
+        en:"Coordinated from here, neighborhood mothers (Stadtteilmütter) visit and accompany families with a migration background in person – in Arabic, Kurdish, Turkish, and other languages. They explain how preschool, school, and public offices work, and can accompany families to appointments if needed.",
+        tr:"Buradan koordine edilen mahalle anneleri (Stadtteilmütter), göçmen kökenli aileleri Arapça, Kürtçe, Türkçe ve diğer dillerde bizzat ziyaret edip destek olur. Kreş, okul ve resmi dairelerin nasıl işlediğini açıklar, gerektiğinde randevulara eşlik ederler.",
+        ru:"Координируемые отсюда «районные мамы» (Stadtteilmütter) лично посещают и сопровождают семьи с миграционным прошлым – на арабском, курдском, турецком и других языках. Они объясняют, как работают детский сад, школа и ведомства, и при необходимости сопровождают на приёмы.",
+        ar:"يتم تنسيق عمل «أمهات الحي» (Stadtteilmütter) من هنا، حيث يزرن العائلات ذات الخلفية المهاجرة ويرافقنها شخصيًا – باللغة العربية والكردية والتركية ولغات أخرى. يشرحن كيفية عمل الروضة والمدرسة والدوائر الحكومية، ويرافقن العائلات عند الحاجة إلى المواعيد."
+      }},
+    { id:"kinderspur", cat:"sport", geo:{query:"Friedrich-Engels-Straße 25, 15711 Königs Wusterhausen, Germany", fallback:[52.29535,13.62922]}, verified:true, name:"Kinderspur – Kinder- und Familienyoga (Nadine Pöthe)",
+      address:"Friedrich-Engels-Str. 25, 15711 Königs Wusterhausen – kommt direkt in Kitas, Schulen und Horte", phone:"0172 989 59 76",
+      desc:{
+        de:"Kinderyoga, Eltern-Kind-Yoga und Familienyoga – die Yogalehrerin kommt direkt in Kitas, Schulen und Horte und gestaltet bewegte, ruhige Momente für Kinder im Kita- und Grundschulalter, auch für neurodivergente Kinder.",
+        en:"Children's yoga, parent-child yoga, and family yoga – the instructor comes directly to preschools, schools, and after-school programs, creating calm, movement-based moments for kindergarten and elementary-age children, including neurodivergent children.",
+        tr:"Çocuk yogası, ebeveyn-çocuk yogası ve aile yogası – yoga eğitmeni doğrudan kreşlere, okullara ve bakım programlarına gelir; kreş ve ilkokul çağındaki çocuklar için, nörodivergent çocuklar dahil, hareketli ve sakin anlar yaratır.",
+        ru:"Детская йога, йога для родителей и детей, семейная йога – инструктор приезжает прямо в детские сады, школы и группы продлённого дня, создавая спокойные, наполненные движением моменты для детей дошкольного и школьного возраста, включая нейроотличных детей.",
+        ar:"يوغا للأطفال، ويوغا للآباء والأطفال، ويوغا عائلية – تأتي المعلمة مباشرة إلى الروضات والمدارس ومراكز الرعاية النهارية، لتخلق لحظات هادئة قائمة على الحركة للأطفال في سن الروضة والمدرسة الابتدائية، بمن فيهم الأطفال ذوو الأنماط العصبية المختلفة."
+      }},
+    { id:"schwimmschule_pingu", cat:"sport", geo:{query:"Waßmannsdorfer Chaussee 5, 12355 Berlin, Germany", fallback:[52.41455,13.49672]}, verified:true, name:"Schwimmschule Pingu Süd – Schwimmkurse in Rudow",
+      address:"Waßmannsdorfer Ch. 5, 12355 Berlin (Rudow)", phone:"06334 79 49 809",
+      desc:{
+        de:"Schwimmkurse für Kinder ab 4 Jahren im warmen Lehrschwimmbecken (29–30 °C): vom Seepferdchen bis zum Freischwimmer-Abzeichen, mit Beobachtungsbereich für Eltern.",
+        en:"Swimming courses for children from age 4 in a warm teaching pool (29–30 °C): from the Seepferdchen beginner badge up to the Freischwimmer certification, with a viewing area for parents.",
+        tr:"4 yaşından itibaren çocuklar için sıcak öğretim havuzunda (29–30 °C) yüzme kursları: Seepferdchen rozetinden Freischwimmer sertifikasına kadar, ebeveynler için izleme alanıyla.",
+        ru:"Курсы плавания для детей от 4 лет в тёплом учебном бассейне (29–30 °C): от значка «Морской конёк» до сертификата «вольного пловца», с зоной наблюдения для родителей.",
+        ar:"دورات سباحة للأطفال من عمر 4 سنوات في حوض سباحة تعليمي دافئ (29–30 درجة مئوية): من شارة Seepferdchen للمبتدئين حتى شهادة Freischwimmer، مع منطقة مشاهدة للآباء."
+      }},
+    { id:"kinderyoga_judith", cat:"sport", geo:{query:"Ortolfstraße 32, 12524 Berlin, Germany", fallback:[52.41445,13.53724]}, verified:true, name:"Kinderyoga mit Judith (Stark. Verbunden. Wachsen.)",
+      address:"Babyinstinkte Altglienicke, Ortolfstr. 32, 12524 Berlin", phone:"0176 30 46 24 33", hours:"Dienstags 15:30–16:15 Uhr (außer Schulferien/Feiertage)",
+      desc:{
+        de:"Kinderyoga für 3- bis 5-Jährige (8 Plätze) bei Babyinstinkte in Altglienicke – spielerisch zur Ruhe kommen, Körpergefühl stärken und in Verbindung miteinander wachsen.",
+        en:"Children's yoga for ages 3–5 (8 spots) at Babyinstinkte in Altglienicke – a playful way to find calm, build body awareness, and grow together in connection.",
+        tr:"Altglienicke'deki Babyinstinkte'de 3-5 yaş arası çocuklar için yoga (8 kontenjan) – oyun yoluyla sakinleşmek, beden farkındalığını güçlendirmek ve birbirine bağlı büyümek için.",
+        ru:"Детская йога для детей 3–5 лет (8 мест) в Babyinstinkte в Альтглинике – игровой способ найти спокойствие, укрепить телесное восприятие и расти вместе в единении.",
+        ar:"يوغا للأطفال من عمر 3 إلى 5 سنوات (8 أماكن) في Babyinstinkte في Altglienicke – وسيلة ممتعة لإيجاد الهدوء وتقوية الإحساس بالجسد والنمو معًا برابط مشترك."
+      }},
+    { id:"interaxion", cat:"migration", geo:{query:"Hasselwerderstraße 38, 12439 Berlin, Germany", fallback:[52.45457,13.5133]}, verified:true, name:"InteraXion – Willkommensbüro Treptow-Köpenick",
+      address:"Hasselwerderstraße 38–40, 12439 Berlin (Niederschöneweide)", phone:"01577 315 13 86",
+      desc:{
+        de:"Beratung für Familien, die neu in Deutschland sind – mehrsprachig, u. a. auf Arabisch, Türkisch und Russisch. Auch dieser Ort liegt etwas außerhalb des Plans, ist aber für viele Familien in der Kita eine wichtige Anlaufstelle.",
+        en:"Counseling for families who are new to Germany – multilingual, including Arabic, Turkish, and Russian. This place is also a bit outside the map, but an important contact for many families at our preschool.",
+        tr:"Almanya'ya yeni gelen aileler için danışmanlık – Arapça, Türkçe ve Rusça dahil çok dilli. Bu yer de haritanın biraz dışında, ancak kreşimizdeki birçok aile için önemli bir başvuru noktası.",
+        ru:"Консультации для семей, недавно приехавших в Германию, – на нескольких языках, включая арабский, турецкий и русский. Это место тоже находится немного за пределами карты, но является важным контактом для многих семей в нашем саду.",
+        ar:"استشارات للعائلات الجديدة في ألمانيا – متعددة اللغات، بما في ذلك العربية والتركية والروسية. يقع هذا المكان أيضًا خارج الخريطة قليلاً، لكنه نقطة اتصال مهمة للعديد من العائلات في روضتنا."
+      }},
+    { id:"frauenarzt_goldammer", cat:"gesundheit", geo:{query:"Wassersportallee 6, 12527 Berlin, Germany", fallback:[52.41712,13.58131]}, verified:true, name:"Frauenarztpraxis Dr. Katrin Goldammer",
+      address:"Wassersportallee 6, 12527 Berlin (Grünau)", phone:"030 674 47 88",
+      desc:{
+        de:"Gynäkologische Praxis in Grünau – Vorsorgeuntersuchungen, Schwangerenbetreuung und Beratung rund um Frauengesundheit.",
+        en:"A gynecology practice in Grünau – check-ups, prenatal care, and counseling on women's health.",
+        tr:"Grünau'da bir kadın hastalıkları muayenehanesi – kontroller, gebelik takibi ve kadın sağlığı konusunda danışmanlık.",
+        ru:"Гинекологическая практика в Грюнау – осмотры, наблюдение беременности и консультации по женскому здоровью.",
+        ar:"عيادة أمراض نساء في غرونآو – فحوصات ومتابعة الحمل واستشارات حول صحة المرأة."
+      }},
+    { id:"hebamme_gramsch", cat:"gesundheit", geo:{query:"Teichmummelring, 12527 Berlin, Germany", fallback:[52.42442,13.57738]}, verified:true, name:"Hebamme Birte Gramsch",
+      address:"Betreut Familien in Grünau, Köpenick und Friedrichshagen (Hausbesuche, kein fester Praxissitz)", plz:"12527", phone:"0176 30 19 79 91",
+      desc:{
+        de:"Eine freiberufliche Hebamme, die Familien in Grünau und Umgebung zu Hause besucht – für Schwangerschaft, Geburtsvorbereitung und die erste Zeit mit Baby.",
+        en:"An independent midwife who visits families at home in Grünau and the surrounding area – for pregnancy, birth preparation, and the early weeks with a newborn.",
+        tr:"Grünau ve çevresindeki aileleri evlerinde ziyaret eden bağımsız bir ebe – gebelik, doğuma hazırlık ve bebekle geçen ilk haftalar için.",
+        ru:"Независимая акушерка, которая посещает семьи на дому в Грюнау и окрестностях – для сопровождения беременности, подготовки к родам и первых недель с малышом.",
+        ar:"قابلة مستقلة تزور العائلات في منازلها في غرونآو والمناطق المجاورة – للحمل والتحضير للولادة والأسابيع الأولى مع المولود."
+      }},
+    { id:"zahnarzt_herold", cat:"gesundheit", geo:{query:"Bruno-Taut-Straße 1, 12524 Berlin, Germany", fallback:[52.41254,13.57229]}, verified:true, name:"Zahnarztpraxis Dr. Anne Sophie Herold",
+      address:"Bruno-Taut-Str. 1, 12524 Berlin (Altglienicke)", phone:"030 672 90 17",
+      desc:{
+        de:"Zahnärztliche Praxis in Altglienicke, spezialisiert auf die Behandlung von Kindern.",
+        en:"A dental practice in Altglienicke, specializing in treating children.",
+        tr:"Altglienicke'de çocuk tedavisinde uzmanlaşmış bir diş hekimi muayenehanesi.",
+        ru:"Стоматологическая практика в Альтглинике, специализирующаяся на лечении детей.",
+        ar:"عيادة أسنان في ألتغلينيكه متخصصة في علاج الأطفال."
+      }},
+    { id:"zahnarzt_krentzneumeyer", cat:"gesundheit", geo:{query:"Semmelweisstraße 8, 12524 Berlin, Germany", fallback:[52.42184,13.53832]}, verified:true, name:"Zahnarztpraxis Krentz-Wenschuh & Dr. Neumeyer",
+      address:"Semmelweisstr. 8, 12524 Berlin (Altglienicke)", phone:"030 672 83 59",
+      desc:{
+        de:"Zahnärztliche Praxis in Altglienicke, ebenfalls mit Schwerpunkt Kinderbehandlung.",
+        en:"A dental practice in Altglienicke, also focused on treating children.",
+        tr:"Altglienicke'de yine çocuk tedavisine ağırlık veren bir diş hekimi muayenehanesi.",
+        ru:"Стоматологическая практика в Альтглинике, также ориентированная на лечение детей.",
+        ar:"عيادة أسنان في ألتغلينيكه تركّز أيضًا على علاج الأطفال."
+      }},
+    { id:"kinderarzt_grygas", cat:"gesundheit", geo:{query:"Grünauer Straße 60, 12524 Berlin, Germany", fallback:[52.41945,13.54242]}, verified:true, name:"Kinderarztpraxis Dr. Ramona Grygas",
+      address:"Grünauer Str. 60, 12524 Berlin (Altglienicke)", phone:"030 673 13 75",
+      desc:{
+        de:"Eine weitere Kinderarztpraxis im Sozialraum – für Vorsorgeuntersuchungen, Impfungen und akute Erkrankungen.",
+        en:"Another pediatric practice in our social space – for check-ups, vaccinations, and acute illness.",
+        tr:"Sosyal alanımızda bir başka çocuk doktoru muayenehanesi – kontroller, aşılar ve ani hastalıklar için.",
+        ru:"Ещё одна детская врачебная практика в нашем социальном пространстве – для осмотров, прививок и острых заболеваний.",
+        ar:"عيادة طب أطفال أخرى في محيطنا الاجتماعي – للفحوصات الدورية والتطعيمات والحالات المرضية الطارئة."
+      }},
+    { id:"fipp_maedchen_frauen", cat:"beratung", geo:{query:"Ehrenfelder Straße 25, 12524 Berlin, Germany", fallback:[52.40194,13.544]}, verified:true, name:"FIPP e. V. – „Starke Mädchen*, starke Frauen*“",
+      address:"Ehrenfelder Str. 25, 12524 Berlin (Altglienicke)", phone:"0174 85 03 331 (Gundula Kurth) / 0162 26 040 04 (Theresa Zanecki)",
+      desc:{
+        de:"Ein Angebot für Mädchen* und Frauen*: stärkende Aktivitäten wie Boxen sowie Austausch- und Begegnungsmöglichkeiten.",
+        en:"An offering for girls* and women*: empowering activities such as boxing, plus opportunities for exchange and meeting others.",
+        tr:"Kız* ve kadınlar* için bir program: boks gibi güçlendirici etkinlikler ile buluşma ve tanışma fırsatları.",
+        ru:"Программа для девочек* и женщин*: укрепляющие занятия, например бокс, а также возможности для общения и встреч.",
+        ar:"برنامج للفتيات* والنساء*: أنشطة تمكينية مثل الملاكمة، بالإضافة إلى فرص للتواصل واللقاء."
+      }},
+    { id:"bfb_altglienicke", cat:"beratung", geo:{query:"Ortolfstraße 182, 12524 Berlin, Germany", fallback:[52.40344,13.52823]}, verified:true, name:"Beratungsstelle für Menschen mit Behinderung, Krebs- und AIDS-Erkrankung (BfB) – Standort Altglienicke",
+      address:"Ortolfstr. 182, Zi. 127, 12524 Berlin (Altglienicke)", phone:"030 90297 6725 (Sprechzeit) / 030 90297 4840", hours:"1. & 3. Mittwoch im Monat, 12:00–15:00",
+      desc:{
+        de:"Beratung für Menschen mit Behinderung oder schwerer Erkrankung und ihre Angehörigen – zu Nachteilsausgleich, Wohnraumanpassung und Unterstützungsmöglichkeiten.",
+        en:"Counseling for people with a disability or serious illness and their families – on compensation for disadvantages, home adaptations, and support options.",
+        tr:"Engelli veya ağır hasta bireyler ve yakınları için danışmanlık – dezavantaj dengeleme, konut uyarlaması ve destek olanakları konusunda.",
+        ru:"Консультации для людей с инвалидностью или тяжёлым заболеванием и их близких – по вопросам компенсации, приспособления жилья и возможностей поддержки.",
+        ar:"استشارات لذوي الإعاقة أو المرض الشديد وذويهم – حول تعويض الأضرار وتكييف السكن وإمكانيات الدعم."
+      }},
+    { id:"familienzentrum_kosmosviertel", cat:"beratung", geo:{query:"Ortolfstraße 182, 12524 Berlin, Germany", fallback:[52.40346,13.52825]}, verified:true, name:"Familienzentrum „Im Kosmosviertel“",
+      address:"Ortolfstr. 182–184, 12524 Berlin (Altglienicke)",
+      desc:{
+        de:"Ein weiteres Familienzentrum im Nachbar-Kiez, im selben Gebäudekomplex wie Stadtteilmütter und Kita „Im Kosmosviertel“ – offene Angebote für Familien.",
+        en:"Another family center in the neighboring area, in the same building complex as the Stadtteilmütter and the „Im Kosmosviertel“ preschool – open activities for families.",
+        tr:"Komşu mahallede, Stadtteilmütter ve „Im Kosmosviertel“ kreşiyle aynı bina kompleksinde bulunan bir başka aile merkezi – aileler için açık etkinlikler.",
+        ru:"Ещё один семейный центр в соседнем квартале, в том же комплексе зданий, что и Stadtteilmütter и детский сад „Im Kosmosviertel“ – открытые мероприятия для семей.",
+        ar:"مركز أسري آخر في الحي المجاور، في نفس المجمع السكني مع «أمهات الحي» وروضة «Im Kosmosviertel» – أنشطة مفتوحة للعائلات."
+      }},
+    { id:"infopoint_alleinerziehende", cat:"beratung", geo:{query:"Ortolfstraße 182, 12524 Berlin, Germany", fallback:[52.4035,13.52827]}, verified:true, name:"Infopoint – Beratungsstelle für Alleinerziehende (offensiv’91 e. V.)",
+      address:"Ortolfstr. 182, 12524 Berlin (Altglienicke)", phone:"0176 55 48 96 62",
+      desc:{
+        de:"Eine Anlaufstelle speziell für alleinerziehende Mütter und Väter – mit Beratung und Austausch mit anderen Alleinerziehenden.",
+        en:"A contact point specifically for single mothers and fathers – offering counseling and exchange with other single parents.",
+        tr:"Özellikle tek başına çocuk yetiştiren anne ve babalar için bir başvuru noktası – danışmanlık ve diğer tek ebeveynlerle tanışma imkânı sunar.",
+        ru:"Место для консультаций специально для матерей- и отцов-одиночек – с советами и общением с другими родителями-одиночками.",
+        ar:"نقطة اتصال مخصصة للأمهات والآباء العازبين – تقدّم استشارات وفرصة للتواصل مع آباء عازبين آخرين."
+      }},
+    { id:"base24", cat:"jugend", geo:{query:"Ortolfstraße 184, 12524 Berlin, Germany", fallback:[52.40342,13.52825]}, verified:true, name:"BASE 24 – Kinder- und Jugendtreff",
+      address:"Ortolfstr. 184, 12524 Berlin (Altglienicke)", phone:"030 90297-6710",
+      desc:{
+        de:"Ein offener Jugendtreff in Altglienicke, u. a. mit eigener Medienetage für Technik, Kreativität und digitale Projekte.",
+        en:"An open youth center in Altglienicke, including its own media floor for tech, creativity, and digital projects.",
+        tr:"Altglienicke'de açık bir gençlik merkezi – teknoloji, yaratıcılık ve dijital projeler için kendi medya katıyla.",
+        ru:"Открытый молодёжный клуб в Альтглинике, включая собственный медиа-этаж для техники, творчества и цифровых проектов.",
+        ar:"نادٍ شبابي مفتوح في ألتغلينيكه، يضم طابقًا إعلاميًا خاصًا للتقنية والإبداع والمشاريع الرقمية."
+      }},
+    { id:"cabuwazi_altglienicke", cat:"jugend", geo:{query:"Venusstraße 90, 12524 Berlin, Germany", fallback:[52.40418,13.53313]}, verified:true, name:"CABUWAZI Altglienicke",
+      address:"Venusstr. 90, 12524 Berlin (Altglienicke)", phone:"030 221 976 60",
+      desc:{
+        de:"Ein Circuszelt für Kinder und Jugendliche: Akrobatik, Trapez, Trampolin, Einrad und Jonglage zum Ausprobieren.",
+        en:"A circus tent for children and young people: acrobatics, trapeze, trampoline, unicycle, and juggling to try out.",
+        tr:"Çocuklar ve gençler için bir sirk çadırı: akrobasi, trapez, trambolin, tek teker bisiklet ve jonglörlük deneme fırsatı.",
+        ru:"Цирковой шатёр для детей и подростков: акробатика, трапеция, батут, одноколёсный велосипед и жонглирование.",
+        ar:"خيمة سيرك للأطفال واليافعين: أكروبات وأرجوحة ترابيز وترامبولين ودراجة أحادية العجلة وألعاب الجونجلة للتجربة."
+      }},
+    { id:"kjfe_fairness", cat:"jugend", geo:{query:"Ehrenfelder Straße 25, 12524 Berlin, Germany", fallback:[52.40194,13.54392]}, verified:true, name:"KJFE Jugendtreff „Fairness“",
+      address:"Ehrenfelder Str. 25, 12524 Berlin (Altglienicke)", phone:"030 567 315 30",
+      desc:{
+        de:"Ein weiterer Jugendtreff in Altglienicke – ein offener Ort zum Treffen, Spielen und Zeitverbringen für Kinder und Jugendliche.",
+        en:"Another youth center in Altglienicke – an open place for children and young people to meet, play, and spend time together.",
+        tr:"Altglienicke'de bir başka gençlik merkezi – çocuklar ve gençler için buluşma, oyun oynama ve vakit geçirme imkânı sunan açık bir yer.",
+        ru:"Ещё один молодёжный клуб в Альтглинике – открытое место для встреч, игр и совместного времяпрепровождения детей и подростков.",
+        ar:"نادٍ شبابي آخر في ألتغلينيكه – مكان مفتوح للأطفال واليافعين للقاء واللعب وقضاء الوقت معًا."
+      }}
+  ];
+
+  // The "further away" list used to be shown separately; it now simply
+  // joins the main list everywhere except the default "Nachbarschaft"
+  // map zoom, which still favors the places closest to the Kita.
+  OFFMAP.forEach(function(loc){ loc.farAway = true; });
+  LOCATIONS = LOCATIONS.concat(OFFMAP);
+
+  var currentLang = "de";
+  var activeCat = null;
+  var activePlz = null;
+  var viewBeforePlz = "neighborhood";
+  var plzLayer = null;
+  var currentView = "neighborhood";
+  var map = null;
+  var markers = {};
+  var GEOCACHE_PREFIX = "gs-geo:";
+
+  // Reads a location's postal code: an explicit `plz` field wins (used for
+  // the handful of entries whose address text has no digits, e.g. a mobile
+  // service), otherwise it's pulled straight out of the address string.
+  function getPlz(loc){
+    if (loc.plz) return loc.plz;
+    var m = loc.address && loc.address.match(/\b(1\d{4})\b/);
+    return m ? m[1] : null;
+  }
+
+  function loadLang(){
+    try{
+      var raw = localStorage.getItem("gartenstadt-lang");
+      if (raw && UI[raw]) currentLang = raw;
+    }catch(e){}
+  }
+  function saveLang(){
+    try{ localStorage.setItem("gartenstadt-lang", currentLang); }catch(e){}
+  }
+
+  function cacheGet(query){
+    try{ var raw = localStorage.getItem(GEOCACHE_PREFIX+query); return raw ? JSON.parse(raw) : null; }
+    catch(e){ return null; }
+  }
+  function cacheSet(query, coord){
+    try{ localStorage.setItem(GEOCACHE_PREFIX+query, JSON.stringify(coord)); }catch(e){}
+  }
+  function sleep(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+
+  function geocodeOne(query){
+    var url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=de&q="+encodeURIComponent(query);
+    return fetch(url, { headers:{ "Accept":"application/json" } })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(data){
+        if (data && data[0]) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        return null;
+      })
+      .catch(function(){ return null; });
+  }
+
+  var userInteracted = false;
+
+  // Refines marker positions in the background: starts from approximate
+  // fallback coordinates (so the map is usable immediately) and swaps in
+  // precise geocoded coordinates as they arrive, one request at a time
+  // (paced to respect Nominatim's usage policy).
+  function refineCoordinates(){
+    var all = LOCATIONS;
+    var i = 0;
+    var anyUpdated = false;
+    function applyCoord(loc, coord){
+      loc.latlng = coord;
+      var m = markers[loc.id];
+      if (m) m.marker.setLatLng(coord);
+      anyUpdated = true;
+    }
+    function next(){
+      if (i >= all.length){
+        if (anyUpdated && !userInteracted) refitCurrentView();
+        return;
+      }
+      var loc = all[i]; i++;
+      // Locations with a verified, hand-checked coordinate keep it as-is —
+      // no live lookup that could snap them to a less accurate spot.
+      if (loc.verified){ next(); return; }
+      var cached = cacheGet(loc.geo.query);
+      if (cached){ applyCoord(loc, cached); next(); return; }
+      geocodeOne(loc.geo.query).then(function(result){
+        if (result){ cacheSet(loc.geo.query, result); applyCoord(loc, result); }
+        return sleep(1100);
+      }).then(next);
+    }
+    next();
+  }
+
+  function makeIcon(loc){
+    var cls = "pin-marker" + (loc.isStart ? " kita" : "");
+    var size = loc.isStart ? 56 : 40;
+    var html = '<div class="'+cls+'" style="--pin-color:'+CATS[loc.cat].color+'">'
+      + '<span>'+CATS[loc.cat].icon+'</span>'
+      + '</div>';
+    return L.divIcon({ html:html, className:"", iconSize:[size,size], iconAnchor:[size/2,size/2] });
+  }
+
+  function addMarker(loc){
+    var marker = L.marker(loc.latlng, { icon: makeIcon(loc), title: loc.name, alt: loc.name });
+    marker.on("click", function(){ openModal(loc.id); });
+    markers[loc.id] = { marker:marker, loc:loc };
+  }
+
+  function buildMarkers(){
+    LOCATIONS.forEach(function(loc){ addMarker(loc); });
+    refreshMarkerVisibility();
+  }
+
+  // Shows only the markers matching the active category filter (or all,
+  // when no filter is set) by adding/removing them from the Leaflet map.
+  function refreshMarkerVisibility(){
+    Object.keys(markers).forEach(function(id){
+      var m = markers[id];
+      var visible = (!activeCat || m.loc.cat === activeCat) && (!activePlz || getPlz(m.loc) === activePlz);
+      var onMap = map.hasLayer(m.marker);
+      if (visible && !onMap) m.marker.addTo(map);
+      if (!visible && onMap) map.removeLayer(m.marker);
+    });
+  }
+
+  function visibleLocations(){
+    return LOCATIONS.filter(function(l){
+      var catOk = !activeCat || l.cat === activeCat;
+      var plzOk = !activePlz || getPlz(l) === activePlz;
+      return catOk && plzOk;
+    });
+  }
+  function clearPlzArea(){
+    if (plzLayer){ map.removeLayer(plzLayer); plzLayer = null; }
+  }
+  function drawPlzArea(plz){
+    clearPlzArea();
+    var area = PLZ_AREAS[plz];
+    if (!area) return;
+    plzLayer = L.polygon(area.ring, {
+      color: area.color, weight: 2.5, fillColor: area.color, fillOpacity: 0.1, dashArray: "6 4"
+    }).addTo(map);
+  }
+  function neighborhoodBounds(){
+    var near = visibleLocations().filter(function(l){ return !l.farAway; });
+    var pts = (near.length ? near : visibleLocations()).map(function(l){ return l.latlng; });
+    return L.latLngBounds(pts);
+  }
+  function allBounds(){
+    return L.latLngBounds(visibleLocations().map(function(l){ return l.latlng; }));
+  }
+  // Clicking either full-district view button always leaves "showing one
+  // postal code" mode — they represent the whole social space, not a slice.
+  function clearPlzIfActive(){
+    if (!activePlz) return;
+    activePlz = null;
+    clearPlzArea();
+    buildPlzFilter();
+    buildChecklists();
+    refreshMarkerVisibility();
+  }
+  function showNeighborhood(){
+    clearPlzIfActive();
+    currentView = "neighborhood";
+    if (visibleLocations().length) map.fitBounds(neighborhoodBounds(), { padding:[28,28] });
+    document.getElementById("btnNeighborhood").classList.add("active");
+    document.getElementById("btnAll").classList.remove("active");
+  }
+  function showAllPlaces(){
+    clearPlzIfActive();
+    currentView = "all";
+    if (visibleLocations().length) map.fitBounds(allBounds(), { padding:[28,28] });
+    document.getElementById("btnAll").classList.add("active");
+    document.getElementById("btnNeighborhood").classList.remove("active");
+  }
+  // Re-applies whichever of the two map views (neighborhood/all) is
+  // currently active — used once background geocoding finishes refining
+  // marker positions on first load.
+  function refitCurrentView(){
+    if (currentView === "all") showAllPlaces(); else showNeighborhood();
+  }
+  // Switches to a category filter (or clears it) and refreshes the
+  // legend, the sidebar list, and which markers are shown on the map.
+  // The map's own pan/zoom is left untouched on purpose — picking a
+  // category should never suddenly zoom the map in or out.
+  function setFilter(cat){
+    activeCat = (cat === null || activeCat === cat) ? null : cat;
+    buildLegend();
+    buildChecklists();
+    refreshMarkerVisibility();
+  }
+  // Switches to showing one postal-code area (or clears it): draws that
+  // Ortsteil's real boundary on the map, filters markers/list to only what
+  // is physically inside it, and zooms to fit the outline — unlike the
+  // category filter, this one IS meant to move the map, since seeing the
+  // boundary is the point.
+  function setPlz(plz){
+    activePlz = (plz === null || activePlz === plz) ? null : plz;
+    buildPlzFilter();
+    buildChecklists();
+    refreshMarkerVisibility();
+    if (activePlz){
+      if (currentView !== "plz") viewBeforePlz = currentView;
+      currentView = "plz";
+      drawPlzArea(activePlz);
+      map.fitBounds(L.latLngBounds(PLZ_AREAS[activePlz].ring), { padding:[16,16] });
+      document.getElementById("btnNeighborhood").classList.remove("active");
+      document.getElementById("btnAll").classList.remove("active");
+    } else {
+      clearPlzArea();
+      currentView = viewBeforePlz || "neighborhood";
+      refitCurrentView();
+    }
+  }
+  function focusLocation(id){
+    var m = markers[id];
+    if (!m || !map) return;
+    var targetZoom = Math.max(map.getZoom(), 16);
+    map.flyTo(m.loc.latlng, targetZoom, { duration:0.7 });
+  }
+
+  function initMap(){
+    map = L.map("leafletMap", { scrollWheelZoom:true, minZoom:10, maxZoom:19 });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom:19,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende'
+    }).addTo(map);
+    map.on("dragstart zoomstart", function(){ userInteracted = true; });
+    buildMarkers();
+    showNeighborhood();
+    document.getElementById("mapLoading").classList.add("hide");
+    // The map container is sized via CSS aspect-ratio inside a flex/grid
+    // layout, so right after insertion Leaflet can briefly read a stale or
+    // zero size (worse on some mobile browsers, or if web fonts reflow the
+    // layout after first paint). A single invalidateSize() only fixes the
+    // pixel measurements — it does NOT recompute a fitBounds() that was
+    // already done against a wrong size — so re-run the current view's fit
+    // a few times as things settle, instead of just once.
+    function settle(){
+      if (!map) return;
+      map.invalidateSize();
+      if (!userInteracted) refitCurrentView();
+    }
+    requestAnimationFrame(function(){ requestAnimationFrame(settle); });
+    setTimeout(settle, 250);
+    setTimeout(settle, 800);
+    window.addEventListener("load", settle);
+    refineCoordinates();
+  }
+
+  function buildLangRow(){
+    var row = document.getElementById("langRow");
+    row.innerHTML = "";
+    Object.keys(UI).forEach(function(code){
+      var b = document.createElement("button");
+      b.className = "lang-btn"; b.type="button";
+      b.textContent = UI[code].langName;
+      b.setAttribute("aria-pressed", code===currentLang ? "true":"false");
+      b.addEventListener("click", function(){ setLang(code); });
+      row.appendChild(b);
+    });
+  }
+
+  function buildLegend(){
+    var wrap = document.getElementById("legend");
+    wrap.innerHTML = "";
+    var order = Object.keys(CATS).filter(function(key){
+      return LOCATIONS.some(function(l){ return l.cat === key; });
+    });
+    var allChip = document.createElement("button");
+    allChip.type = "button";
+    allChip.className = "legend-chip" + (activeCat === null ? " active" : "");
+    allChip.textContent = "🔎 " + UI[currentLang].filterAll;
+    allChip.addEventListener("click", function(){ setFilter(null); });
+    wrap.appendChild(allChip);
+    order.forEach(function(key){
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "legend-chip" + (activeCat === key ? " active" : "");
+      var dot = document.createElement("span");
+      dot.className = "legend-dot";
+      dot.style.background = CATS[key].color;
+      chip.appendChild(dot);
+      var txt = document.createElement("span");
+      txt.textContent = CATS[key].icon + " " + CATS[key].label[currentLang];
+      chip.appendChild(txt);
+      chip.addEventListener("click", function(){ setFilter(key); });
+      wrap.appendChild(chip);
+    });
+  }
+
+  // Renders the postal-code chips: one reset chip ("whole neighborhood")
+  // plus one per Ortsteil in PLZ_AREAS, each tinted with that area's color.
+  function buildPlzFilter(){
+    var wrap = document.getElementById("plzFilter");
+    wrap.innerHTML = "";
+    var resetChip = document.createElement("button");
+    resetChip.type = "button";
+    resetChip.className = "plz-chip" + (activePlz === null ? " active" : "");
+    resetChip.textContent = "🗺️ " + UI[currentLang].plzReset;
+    resetChip.addEventListener("click", function(){ setPlz(null); });
+    wrap.appendChild(resetChip);
+    Object.keys(PLZ_AREAS).forEach(function(plz){
+      var area = PLZ_AREAS[plz];
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "plz-chip" + (activePlz === plz ? " active" : "");
+      chip.style.setProperty("--plz-color", area.color);
+      var swatch = document.createElement("span");
+      swatch.className = "plz-swatch";
+      chip.appendChild(swatch);
+      var txt = document.createElement("span");
+      txt.textContent = plz + " · " + area.name;
+      chip.appendChild(txt);
+      chip.addEventListener("click", function(){ setPlz(plz); });
+      wrap.appendChild(chip);
+    });
+  }
+
+  // The sidebar is one single list, grouped by category (in the same
+  // order as the legend chips) — there is no separate "further away"
+  // section anymore.
+  function buildChecklists(){
+    var main = document.getElementById("checklist");
+    main.innerHTML = "";
+    var order = Object.keys(CATS);
+    var items = visibleLocations().filter(function(l){return !l.isStart;}).slice().sort(function(a,b){
+      return order.indexOf(a.cat) - order.indexOf(b.cat);
+    });
+    items.forEach(function(loc){
+      main.appendChild(checklistItem(loc));
+    });
+    if (!items.length){
+      var hint = document.createElement("li");
+      hint.className = "empty-hint";
+      hint.textContent = activePlz ? UI[currentLang].plzEmptyFilter : UI[currentLang].emptyFilter;
+      main.appendChild(hint);
+    }
+  }
+
+  function checklistItem(loc){
+    var li = document.createElement("li");
+    var dot = document.createElement("span");
+    dot.className = "dot";
+    dot.textContent = CATS[loc.cat].icon;
+    li.appendChild(dot);
+    var nameWrap = document.createElement("span");
+    nameWrap.className = "name";
+    nameWrap.textContent = loc.name;
+    var catSpan = document.createElement("span");
+    catSpan.className = "cat";
+    catSpan.textContent = CATS[loc.cat].label[currentLang];
+    nameWrap.appendChild(catSpan);
+    li.appendChild(nameWrap);
+    li.addEventListener("click", function(){ focusLocation(loc.id); openModal(loc.id); });
+    return li;
+  }
+
+  function findLoc(id){
+    for (var i=0;i<LOCATIONS.length;i++){ if (LOCATIONS[i].id===id) return LOCATIONS[i]; }
+    return null;
+  }
+
+  var activeOverlay, activeModal;
+  function openModal(id){
+    var loc = findLoc(id);
+    if (!loc) return;
+    document.getElementById("modalIcon").textContent = CATS[loc.cat].icon;
+    document.getElementById("modalIcon").style.background = "color-mix(in srgb, " + CATS[loc.cat].color + " 22%, transparent)";
+    document.getElementById("modalCat").textContent = CATS[loc.cat].label[currentLang];
+    document.getElementById("modalTitle").textContent = loc.name;
+    document.getElementById("modalDesc").textContent = loc.desc[currentLang];
+    var meta = document.getElementById("modalMeta");
+    meta.innerHTML = "";
+    if (loc.address) meta.appendChild(metaRow(UI[currentLang].addressLabel, loc.address));
+    if (loc.phone) meta.appendChild(metaRow(UI[currentLang].phoneLabel, loc.phone));
+    if (loc.hours) meta.appendChild(metaRow(UI[currentLang].hoursLabel, loc.hours));
+    var tagWrap = document.getElementById("modalTagWrap");
+    tagWrap.innerHTML = "";
+    if (loc.isStart){
+      var tag = document.createElement("span");
+      tag.className = "modal-tag";
+      tag.textContent = "🏠 " + UI[currentLang].startHere;
+      tagWrap.appendChild(tag);
+    }
+
+    document.getElementById("overlay").classList.add("open");
+  }
+  function metaRow(k,v){
+    var row = document.createElement("div");
+    row.className = "row";
+    var kk = document.createElement("span"); kk.className="k"; kk.textContent = k + ":";
+    var vv = document.createElement("span"); vv.textContent = v;
+    row.appendChild(kk); row.appendChild(vv);
+    return row;
+  }
+  function closeModal(){
+    document.getElementById("overlay").classList.remove("open");
+  }
+
+  function applyStaticI18n(){
+    document.querySelectorAll("[data-i18n]").forEach(function(node){
+      var key = node.getAttribute("data-i18n");
+      if (UI[currentLang][key] !== undefined) node.textContent = UI[currentLang][key];
+    });
+  }
+
+  function setLang(code){
+    if (!UI[code]) return;
+    currentLang = code;
+    saveLang();
+    document.documentElement.lang = code;
+    document.documentElement.dir = (code === "ar") ? "rtl" : "ltr";
+    applyStaticI18n();
+    buildLangRow();
+    buildLegend();
+    buildPlzFilter();
+    buildChecklists();
+    document.getElementById("modalClose").setAttribute("aria-label", UI[currentLang].close);
+  }
+
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  document.getElementById("overlay").addEventListener("click", function(ev){
+    if (ev.target.id === "overlay") closeModal();
+  });
+  document.addEventListener("keydown", function(ev){
+    if (ev.key === "Escape") closeModal();
+  });
+
+  document.getElementById("btnNeighborhood").addEventListener("click", showNeighborhood);
+  document.getElementById("btnAll").addEventListener("click", showAllPlaces);
+
+  loadLang();
+  buildLangRow();
+  buildLegend();
+  buildPlzFilter();
+  buildChecklists();
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = (currentLang === "ar") ? "rtl" : "ltr";
+  applyStaticI18n();
+
+  LOCATIONS.forEach(function(loc){
+    var cached = cacheGet(loc.geo.query);
+    loc.latlng = cached || loc.geo.fallback;
+  });
+  if (typeof L === "undefined"){
+    // The Leaflet library failed to load (e.g. no network access to the
+    // CDN) — show a clear message instead of leaving a silent blank box.
+    var loadingEl = document.getElementById("mapLoading");
+    loadingEl.innerHTML = "";
+    var msg = document.createElement("span");
+    msg.textContent = "Die Kartenbibliothek konnte nicht geladen werden (keine Internetverbindung zum CDN?). Bitte Seite mit Internetzugang neu laden.";
+    loadingEl.appendChild(msg);
+  } else {
+    try { initMap(); }
+    catch (err){
+      var loadingEl2 = document.getElementById("mapLoading");
+      loadingEl2.innerHTML = "";
+      var msg2 = document.createElement("span");
+      msg2.textContent = "Die Karte konnte nicht geladen werden: " + err.message;
+      loadingEl2.appendChild(msg2);
+    }
+  }
+})();
+</script>
